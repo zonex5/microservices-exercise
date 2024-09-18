@@ -1,2 +1,5 @@
 rootProject.name = 'microservices-exercise'
 
+includeBuild 'service-discovery'
+includeBuild 'api-gateway'
+includeBuild 'book-service'

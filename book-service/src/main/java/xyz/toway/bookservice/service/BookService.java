@@ -4,29 +4,53 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import xyz.toway.bookservice.entity.AuthorEntity;
-import xyz.toway.bookservice.repository.AuthorRepository;
+import xyz.toway.bookservice.entity.BookEntity;
+import xyz.toway.bookservice.repository.BookRepository;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
-public class AuthorService {
+public class BookService {
 
-    private final AuthorRepository authorRepository;
+    private final BookRepository bookRepository;
 
-    public AuthorService(@Autowired AuthorRepository authorRepository) {
-        this.authorRepository = authorRepository;
+    public BookService(@Autowired BookRepository bookRepository) {
+        this.bookRepository = bookRepository;
     }
 
-    public AuthorEntity saveAuthor(@Valid AuthorEntity author) {
-        return authorRepository.save(author);
+    public BookEntity saveBook(@Valid BookEntity author) {
+        return bookRepository.save(author);
     }
 
-    public List<AuthorEntity> getAllAuthors() {
-        return authorRepository.findAll(Sort.by("name"));
+    public List<BookEntity> getAllBooks() {
+        return bookRepository.findAll(Sort.by("title"));
     }
 
-    public void deleteAuthor(Long id) {
-        authorRepository.deleteById(id);
+    public List<BookEntity> getAllByTag(String tag) {
+        return bookRepository.findByTag(tag);
+    }
+
+    public void deleteBook(Long id) {
+        bookRepository.deleteById(id);
+    }
+
+    public List<BookEntity> searchBooks(Map<String, String> params) {
+        if (params == null || params.isEmpty()) return null;
+
+        // search by tag
+        if (params.containsKey("tag")) {
+            return bookRepository.findByTag(params.get("tag"));
+        }
+        // search by title
+        else if (params.containsKey("title")) {
+            return bookRepository.findByTitleIsContainingIgnoreCase(params.get("title"));
+        }
+        // search by author
+        else if (params.containsKey("author")) {
+            return bookRepository.findByAuthorNameIsContainingIgnoreCase(params.get("author"));
+        }
+
+        return null;
     }
 }

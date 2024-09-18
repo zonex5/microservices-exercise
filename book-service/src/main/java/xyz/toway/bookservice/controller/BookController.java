@@ -1,31 +1,43 @@
 package xyz.toway.bookservice.controller;
 
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import xyz.toway.bookservice.entity.AuthorEntity;
-import xyz.toway.bookservice.service.AuthorService;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import xyz.toway.bookservice.entity.BookEntity;
+import xyz.toway.bookservice.service.BookService;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/authors")
-public class AuthorController {
+@RequestMapping("/books")
+public class BookController {
 
-    private final AuthorService authorService;
+    private final BookService bookService;
 
-    public AuthorController(@Autowired AuthorService authorService) {
-        this.authorService = authorService;
+    public BookController(@Autowired BookService bookService) {
+        this.bookService = bookService;
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllAuthors() {
-        List<AuthorEntity> users = authorService.getAllAuthors();
+    public ResponseEntity<?> getAllBooks() {
+        List<BookEntity> users = bookService.getAllBooks();
         return ResponseEntity.ok(users);
     }
 
-    @PostMapping
+    @GetMapping("/search")
+    public ResponseEntity<?> searchBooks(@RequestParam Map<String, String> params) {
+        List<BookEntity> users = bookService.searchBooks(params);
+        if (users == null) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(users);
+    }
+
+/*    @PostMapping
     private ResponseEntity<?> createAuthor(@Valid @RequestBody AuthorEntity author) {
         AuthorEntity createdUser = authorService.saveAuthor(author);
         return ResponseEntity.ok(createdUser);
@@ -42,5 +54,5 @@ public class AuthorController {
     private ResponseEntity<?> deleteAuthor(@PathVariable Long id) {
         authorService.deleteAuthor(id);
         return ResponseEntity.ok().build();
-    }
+    }*/
 }
