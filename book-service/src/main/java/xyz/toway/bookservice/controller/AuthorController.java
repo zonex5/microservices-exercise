@@ -20,9 +20,14 @@ public class AuthorController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllAuthors() {
+    private ResponseEntity<?> getAllAuthors() {
         List<AuthorEntity> users = authorService.getAllAuthors();
         return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/{id}")
+    private ResponseEntity<?> getAuthor(@PathVariable Long id) {
+        return ResponseEntity.ok(authorService.getAuthor(id));
     }
 
     @PostMapping

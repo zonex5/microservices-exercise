@@ -3,8 +3,11 @@ package xyz.toway.bookservice.service;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import xyz.toway.bookservice.entity.BookEntity;
+import xyz.toway.bookservice.model.BookModel;
+import xyz.toway.bookservice.repository.AuthorRepository;
 import xyz.toway.bookservice.repository.BookRepository;
 
 import java.util.List;
@@ -14,13 +17,31 @@ import java.util.Map;
 public class BookService {
 
     private final BookRepository bookRepository;
+    private final AuthorRepository authorRepository;
 
-    public BookService(@Autowired BookRepository bookRepository) {
+    public BookService(@Autowired BookRepository bookRepository, @Autowired AuthorRepository authorRepository) {
         this.bookRepository = bookRepository;
+        this.authorRepository = authorRepository;
     }
 
-    public BookEntity saveBook(@Valid BookEntity author) {
-        return bookRepository.save(author);
+    public BookEntity saveBook(@Valid BookEntity book) {
+        return bookRepository.save(book);
+    }
+
+    public BookEntity saveBook(@Valid BookModel book) {
+        var opt = authorRepository.findById(book.authorId());
+        if (opt.isPresent()) {
+            var bk = createBookEntity(book);
+            bk.setAuthor(opt.get());
+            return bookRepository.save(bk);
+        } else {
+            throw new RuntimeException("No author with id=" + book.authorId());
+        }
+    }
+
+    public BookEntity updateBook(@Valid BookModel book, Long id) {
+        var updatedBook = new BookModel(id, book.authorId(), book.title(), book.edition(), book.tags());
+        return saveBook(updatedBook);
     }
 
     public List<BookEntity> getAllBooks() {
@@ -52,5 +73,22 @@ public class BookService {
         }
 
         return null;
+    }
+
+    private BookEntity createBookEntity(BookModel model) {
+        BookEntity entity = new BookEntity();
+        entity.setId(model.id());
+        entity.setTitle(model.title());
+        entity.setTags(model.tags());
+        entity.setEdition(model.edition());
+        return entity;
+    }
+
+    public BookEntity getBook(Long id) {
+        return bookRepository.findById(id).orElseThrow();
+    }
+
+    public boolean bookExists(Long id) {
+        return bookRepository.existsById(id);
     }
 }

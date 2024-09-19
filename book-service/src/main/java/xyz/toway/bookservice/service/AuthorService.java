@@ -26,6 +26,10 @@ public class AuthorService {
         return authorRepository.findAll(Sort.by("name"));
     }
 
+    public AuthorEntity getAuthor(Long id) {
+        return authorRepository.findById(id).orElseThrow();
+    }
+
     public void deleteAuthor(Long id) {
         authorRepository.deleteById(id);
     }

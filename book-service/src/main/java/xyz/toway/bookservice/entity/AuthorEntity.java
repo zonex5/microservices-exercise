@@ -33,4 +33,8 @@ public class AuthorEntity {
     @Column(name = "date_of_death")
     @PastOrPresent(message = "The date of death cannot be in the future.")
     private LocalDate dateOfDeath;
+
+    public AuthorEntity(Long id) {
+        this.id = id;
+    }
 }
