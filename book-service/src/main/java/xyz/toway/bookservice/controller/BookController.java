@@ -2,12 +2,12 @@ package xyz.toway.bookservice.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import xyz.toway.bookservice.entity.BookEntity;
 import xyz.toway.bookservice.model.BookModel;
 import xyz.toway.bookservice.service.BookService;
+import xyz.toway.shared.model.SharedBookModel;
 
 import java.util.List;
 import java.util.Map;
@@ -30,11 +30,14 @@ public class BookController {
 
     @GetMapping("/search")
     public ResponseEntity<?> searchBooks(@RequestParam Map<String, String> params) {
-        List<BookEntity> users = bookService.searchBooks(params);
-        if (users == null) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(users);
+        List<SharedBookModel> books = bookService.searchBooks(params);
+        return ResponseEntity.ok(books);
+    }
+
+    @GetMapping("/search-ids")
+    public ResponseEntity<?> searchBooksIds(@RequestParam Map<String, String> params) {
+        List<Long> ids = bookService.searchBooksIds(params);
+        return ResponseEntity.ok(ids);
     }
 
     @PostMapping

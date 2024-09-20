@@ -3,10 +3,12 @@ package xyz.toway.libraryservice.service;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import xyz.toway.libraryservice.entity.LibraryEntity;
+import xyz.toway.libraryservice.entity.LibraryStockEntity;
 import xyz.toway.libraryservice.repository.LibraryRepository;
+import xyz.toway.libraryservice.repository.LibraryStockRepository;
+import xyz.toway.shared.model.SharedLibraryModel;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,9 +17,11 @@ import java.util.Optional;
 public class LibraryService {
 
     private final LibraryRepository libraryRepository;
+    private final LibraryStockRepository libraryStockRepository;
 
-    public LibraryService(@Autowired LibraryRepository libraryRepository) {
+    public LibraryService(@Autowired LibraryRepository libraryRepository, @Autowired LibraryStockRepository libraryStockRepository) {
         this.libraryRepository = libraryRepository;
+        this.libraryStockRepository = libraryStockRepository;
     }
 
     public LibraryEntity saveLibrary(@Valid LibraryEntity library) {
@@ -40,5 +44,16 @@ public class LibraryService {
                     return entity;
                 })
                 .map(libraryRepository::save);
+    }
+
+    public List<SharedLibraryModel> getAllLibrariesByBookIds(List<Long> ids) {
+        return libraryStockRepository.findAllByBookIdInAndQuantityGreaterThan(ids, 0)
+                .stream()
+                .map(this::createLibraryModel)
+                .toList();
+    }
+
+    public SharedLibraryModel createLibraryModel(LibraryStockEntity entity) {
+        return new SharedLibraryModel(entity.getId(), entity.getName(), entity.getAddress());
     }
 }

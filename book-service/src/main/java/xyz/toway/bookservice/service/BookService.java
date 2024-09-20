@@ -3,18 +3,24 @@ package xyz.toway.bookservice.service;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import xyz.toway.bookservice.entity.BookEntity;
 import xyz.toway.bookservice.model.BookModel;
 import xyz.toway.bookservice.repository.AuthorRepository;
 import xyz.toway.bookservice.repository.BookRepository;
+import xyz.toway.shared.model.SharedAuthorModel;
+import xyz.toway.shared.model.SharedBookModel;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class BookService {
+
+    private final static String SEARCH_Q = "q";
+    private final static String SEARCH_TYPE = "type";
 
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
@@ -48,31 +54,74 @@ public class BookService {
         return bookRepository.findAll(Sort.by("title"));
     }
 
-    public List<BookEntity> getAllByTag(String tag) {
-        return bookRepository.findByTag(tag);
-    }
-
     public void deleteBook(Long id) {
         bookRepository.deleteById(id);
     }
 
-    public List<BookEntity> searchBooks(Map<String, String> params) {
-        if (params == null || params.isEmpty()) return null;
+    public List<SharedBookModel> searchBooks(Map<String, String> params) {
+        checkQueryParams(params);
+        String q = params.get(SEARCH_Q);
+        return switch (params.get(SEARCH_TYPE)) {
+            case "tag" -> bookRepository.findByTag(q)
+                    .stream()
+                    .map(this::createSharedBookModel)
+                    .toList();
+            case "title" -> bookRepository.findByTitleIsContainingIgnoreCase(q)
+                    .stream()
+                    .map(this::createSharedBookModel)
+                    .toList();
+            case "author" -> bookRepository.findByAuthorNameIsContainingIgnoreCase(q)
+                    .stream()
+                    .map(this::createSharedBookModel)
+                    .toList();
+            default -> new ArrayList<>();
+        };
+    }
 
-        // search by tag
-        if (params.containsKey("tag")) {
-            return bookRepository.findByTag(params.get("tag"));
-        }
-        // search by title
-        else if (params.containsKey("title")) {
-            return bookRepository.findByTitleIsContainingIgnoreCase(params.get("title"));
-        }
-        // search by author
-        else if (params.containsKey("author")) {
-            return bookRepository.findByAuthorNameIsContainingIgnoreCase(params.get("author"));
-        }
+    public List<Long> searchBooksIds(Map<String, String> params) {
+        checkQueryParams(params);
+        String q = params.get(SEARCH_Q);
+        return switch (params.get(SEARCH_TYPE)) {
+            case "tag" -> bookRepository.findByTag(q)
+                    .stream()
+                    .map(BookEntity::getId)
+                    .toList();
+            case "title" -> bookRepository.findByTitleIsContainingIgnoreCase(q)
+                    .stream()
+                    .map(BookEntity::getId)
+                    .toList();
+            case "author" -> bookRepository.findByAuthorNameIsContainingIgnoreCase(q)
+                    .stream()
+                    .map(BookEntity::getId)
+                    .toList();
+            default -> new ArrayList<>();
+        };
+    }
 
-        return null;
+    public BookEntity getBook(Long id) {
+        return bookRepository.findById(id).orElseThrow();
+    }
+
+    public boolean bookExists(Long id) {
+        return bookRepository.existsById(id);
+    }
+
+    private SharedBookModel createSharedBookModel(BookEntity entity) {
+
+        if (Objects.isNull(entity)) return null;
+
+        SharedAuthorModel authorModel = null;
+        var author = entity.getAuthor();
+        if (Objects.nonNull(author)) {
+            authorModel = new SharedAuthorModel(author.getId(), author.getName(), author.getDateOfBirth(), author.getDateOfDeath());
+        }
+        return new SharedBookModel(
+                entity.getId(),
+                entity.getTitle(),
+                entity.getEdition(),
+                entity.getTags(),
+                authorModel
+        );
     }
 
     private BookEntity createBookEntity(BookModel model) {
@@ -84,11 +133,9 @@ public class BookService {
         return entity;
     }
 
-    public BookEntity getBook(Long id) {
-        return bookRepository.findById(id).orElseThrow();
-    }
-
-    public boolean bookExists(Long id) {
-        return bookRepository.existsById(id);
+    private static void checkQueryParams(Map<String, String> params) {
+        if (params == null || !params.containsKey(SEARCH_Q) || !params.containsKey(SEARCH_TYPE)) {
+            throw new RuntimeException("The search parameters are incorrect.");
+        }
     }
 }

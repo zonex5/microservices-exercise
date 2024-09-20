@@ -8,12 +8,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import xyz.toway.libraryservice.entity.LibraryEntity;
 import xyz.toway.libraryservice.service.LibraryService;
+import xyz.toway.shared.model.SharedLibraryModel;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/libraries")
 public class LibraryController {
+
+    private final static int MAX_ALLOWED_IDS = 100;
 
     private final LibraryService libraryService;
 
@@ -25,6 +28,15 @@ public class LibraryController {
     private ResponseEntity<?> getAllLibraries() {
         List<LibraryEntity> libs = libraryService.getAllLibraries();
         return ResponseEntity.ok(libs);
+    }
+
+    @GetMapping("/search-by-books")
+    private ResponseEntity<?> getAllLibrariesByBookIds(@RequestParam("id") List<Long> ids) {
+        if (ids.size() > MAX_ALLOWED_IDS) {
+            return ResponseEntity.badRequest().body("Max allowed books to search: " + MAX_ALLOWED_IDS);
+        }
+        List<SharedLibraryModel> items = libraryService.getAllLibrariesByBookIds(ids);
+        return ResponseEntity.ok(items);
     }
 
     @PostMapping
