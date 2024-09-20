@@ -26,16 +26,25 @@ public class LibraryController {
 
     @GetMapping
     private ResponseEntity<?> getAllLibraries() {
-        List<LibraryEntity> libs = libraryService.getAllLibraries();
+        var libs = libraryService.getAllLibraries();
         return ResponseEntity.ok(libs);
     }
 
-    @GetMapping("/search-by-books")
+    @GetMapping("/search-by-book-ids")
     private ResponseEntity<?> getAllLibrariesByBookIds(@RequestParam("id") List<Long> ids) {
         if (ids.size() > MAX_ALLOWED_IDS) {
             return ResponseEntity.badRequest().body("Max allowed books to search: " + MAX_ALLOWED_IDS);
         }
-        List<SharedLibraryModel> items = libraryService.getAllLibrariesByBookIds(ids);
+        var items = libraryService.getAllLibrariesByBookIds(ids);
+        return ResponseEntity.ok(items);
+    }
+
+    @GetMapping("/search-stock-by-ids")
+    private ResponseEntity<?> getAllLibrariesStockByIds(@RequestParam("id") List<Long> ids) {
+        if (ids.size() > MAX_ALLOWED_IDS) {
+            return ResponseEntity.badRequest().body("Max allowed books to search: " + MAX_ALLOWED_IDS);
+        }
+        var items = libraryService.getAllLibrariesStockByIds(ids);
         return ResponseEntity.ok(items);
     }
 

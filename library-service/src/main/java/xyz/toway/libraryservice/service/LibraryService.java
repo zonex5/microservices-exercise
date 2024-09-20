@@ -9,6 +9,7 @@ import xyz.toway.libraryservice.entity.LibraryStockEntity;
 import xyz.toway.libraryservice.repository.LibraryRepository;
 import xyz.toway.libraryservice.repository.LibraryStockRepository;
 import xyz.toway.shared.model.SharedLibraryModel;
+import xyz.toway.shared.model.SharedLibraryStockModel;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,7 +54,18 @@ public class LibraryService {
                 .toList();
     }
 
+    public List<SharedLibraryStockModel> getAllLibrariesStockByIds(List<Long> ids) {
+        return libraryStockRepository.findAllByBookIdInAndQuantityGreaterThan(ids, 0)
+                .stream()
+                .map(this::createLibraryStockModel)
+                .toList();
+    }
+
     public SharedLibraryModel createLibraryModel(LibraryStockEntity entity) {
         return new SharedLibraryModel(entity.getId(), entity.getName(), entity.getAddress());
+    }
+
+    public SharedLibraryStockModel createLibraryStockModel(LibraryStockEntity entity) {
+        return new SharedLibraryStockModel(entity.getId(), entity.getName(), entity.getAddress(), entity.getStockId(), entity.getBookId(), entity.getQuantity(), entity.getPrice());
     }
 }
