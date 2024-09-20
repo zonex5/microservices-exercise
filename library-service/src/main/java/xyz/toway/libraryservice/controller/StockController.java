@@ -52,7 +52,7 @@ public class StockController {
     }
 
     @DeleteMapping("/{id}")
-    private ResponseEntity<?> deleteBook(@PathVariable Long id) {
+    private ResponseEntity<?> deleteStockItem(@PathVariable Long id) {
         stockService.delete(id);
         return ResponseEntity.ok().build();
     }
