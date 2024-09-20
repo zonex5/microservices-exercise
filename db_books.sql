@@ -1,7 +1,4 @@
-create database db_books
-    with owner postgres;
-
-create table public.authors
+create table authors
 (
     id            serial
         constraint authors_pk
@@ -13,17 +10,17 @@ create table public.authors
     date_of_death date
 );
 
-alter table public.authors
+alter table authors
     owner to postgres;
 
-create table public.books
+create table books
 (
     id        serial
         constraint books_pk
             primary key,
     id_author integer      not null
         constraint books_authors_id_fk
-            references public.authors
+            references authors
             on update cascade on delete restrict,
     title     varchar(500) not null,
     edition   integer,
@@ -32,8 +29,8 @@ create table public.books
         unique (id_author, title)
 );
 
-comment on column public.books.edition is 'year of edition';
+comment on column books.edition is 'year of edition';
 
-alter table public.books
+alter table books
     owner to postgres;
 

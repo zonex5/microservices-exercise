@@ -56,4 +56,9 @@ public class StockController {
         stockService.delete(id);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/check")
+    private ResponseEntity<?> checkBeforeSale(@RequestParam("libraryId") Long libraryId, @RequestParam("bookId") Long bookId, @RequestParam("quantity") Integer quantity) {
+        return ResponseEntity.ok(stockService.checkBeforeSale(libraryId, bookId, quantity));
+    }
 }

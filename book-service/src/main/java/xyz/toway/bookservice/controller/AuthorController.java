@@ -38,7 +38,7 @@ public class AuthorController {
 
     @PutMapping("/{id}")
     private ResponseEntity<?> updateAuthor(@Valid @RequestBody AuthorEntity author, @PathVariable Long id) {
-        author.setId(id);
+        author.setId(id);  //todo
         AuthorEntity createdUser = authorService.saveAuthor(author);
         return ResponseEntity.ok(createdUser);
     }

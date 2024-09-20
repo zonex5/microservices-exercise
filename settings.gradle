@@ -5,5 +5,6 @@ include 'api-gateway'
 include 'book-service'
 include 'library-service'
 include 'search-service'
+include 'sales-service'
 include 'shared-module'
 

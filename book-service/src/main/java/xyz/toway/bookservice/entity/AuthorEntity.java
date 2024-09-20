@@ -12,7 +12,7 @@ import java.time.LocalDate;
 
 @Data
 @Entity
-@Table(name = "authors", uniqueConstraints = {@UniqueConstraint(columnNames = {"name"})})
+@Table(name = "authors")
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuthorEntity {

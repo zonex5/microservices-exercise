@@ -7,7 +7,9 @@ import xyz.toway.libraryservice.entity.StockEntity;
 import xyz.toway.libraryservice.model.StockModel;
 import xyz.toway.libraryservice.proxy.BookServiceProxy;
 import xyz.toway.libraryservice.repository.LibraryRepository;
+import xyz.toway.libraryservice.repository.LibraryStockRepository;
 import xyz.toway.libraryservice.repository.StockRepository;
+import xyz.toway.shared.exception.WrongParamsException;
 
 import java.util.List;
 
@@ -16,11 +18,13 @@ public class StockService {
 
     private final StockRepository stockRepository;
     private final LibraryRepository libraryRepository;
+    private final LibraryStockRepository libraryStockRepository;
     private final BookServiceProxy bookServiceProxy;
 
-    public StockService(@Autowired StockRepository stockRepository, @Autowired LibraryRepository libraryRepository, @Autowired BookServiceProxy bookServiceProxy) {
+    public StockService(@Autowired StockRepository stockRepository, @Autowired LibraryRepository libraryRepository, @Autowired LibraryStockRepository libraryStockRepository, @Autowired BookServiceProxy bookServiceProxy) {
         this.stockRepository = stockRepository;
         this.libraryRepository = libraryRepository;
+        this.libraryStockRepository = libraryStockRepository;
         this.bookServiceProxy = bookServiceProxy;
     }
 
@@ -68,5 +72,10 @@ public class StockService {
         if (!bookExists) {
             throw new RuntimeException("No book with id=" + id);
         }
+    }
+
+    public boolean checkBeforeSale(Long libraryId, Long bookId, Integer quantity) {
+        var stockOptional = libraryStockRepository.findFirstByIdAndBookId(libraryId, bookId);
+        return stockOptional.isPresent() && stockOptional.get().getQuantity() >= quantity;
     }
 }
