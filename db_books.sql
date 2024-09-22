@@ -10,9 +10,6 @@ create table authors
     date_of_death date
 );
 
-alter table authors
-    owner to postgres;
-
 create table books
 (
     id        serial
@@ -30,7 +27,3 @@ create table books
 );
 
 comment on column books.edition is 'year of edition';
-
-alter table books
-    owner to postgres;
-

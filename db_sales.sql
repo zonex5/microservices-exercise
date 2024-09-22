@@ -8,7 +8,3 @@ create table sales
     quantity   integer   default 0     not null,
     sale_date  timestamp default now() not null
 );
-
-alter table sales
-    owner to postgres;
-

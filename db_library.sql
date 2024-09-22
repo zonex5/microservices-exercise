@@ -9,9 +9,6 @@ create table libraries
     address varchar(250)
 );
 
-alter table libraries
-    owner to postgres;
-
 create table stock
 (
     id         serial
@@ -28,9 +25,6 @@ create table stock
         unique (id_library, id_book)
 );
 
-alter table stock
-    owner to postgres;
-
 create view library_stock_view(id, id_library, name, address, id_book, quantity, price) as
 SELECT DISTINCT s.id,
                 l.id AS id_library,
@@ -41,7 +35,3 @@ SELECT DISTINCT s.id,
                 s.price
 FROM stock s
          JOIN libraries l ON l.id = s.id_library;
-
-alter table library_stock_view
-    owner to postgres;
-

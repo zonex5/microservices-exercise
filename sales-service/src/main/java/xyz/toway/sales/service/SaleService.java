@@ -4,13 +4,13 @@ import jakarta.validation.Valid;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import xyz.toway.sales.config.RabbitMQConfig;
 import xyz.toway.sales.entity.SaleEntity;
 import xyz.toway.sales.model.SaleModel;
 import xyz.toway.sales.proxy.LibraryServiceProxy;
 import xyz.toway.sales.repository.SaleRepository;
 import xyz.toway.shared.exception.WrongParamsException;
 import xyz.toway.shared.model.SharedSaleModel;
+import xyz.toway.shared.other.RabbitMQConstants;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -44,7 +44,7 @@ public class SaleService {
         saleRepository.deleteById(id);
 
         // send message about delete sale
-        qpTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.DELETE_ROUTING_KEY, createSharedSaleModel(sale));
+        qpTemplate.convertAndSend(RabbitMQConstants.EXCHANGE_NAME, RabbitMQConstants.DELETE_ROUTING_KEY, createSharedSaleModel(sale));
     }
 
     public SaleModel createSale(@Valid SaleModel sale) {
@@ -54,7 +54,7 @@ public class SaleService {
             var saleResult = createSaleModel(saleRepository.save(entity));
 
             // send message about new sale
-            qpTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ADD_ROUTING_KEY, createSharedSaleModel(saleResult));
+            qpTemplate.convertAndSend(RabbitMQConstants.EXCHANGE_NAME, RabbitMQConstants.ADD_ROUTING_KEY, createSharedSaleModel(saleResult));
 
             return saleResult;
         } else {

@@ -10,6 +10,7 @@ import xyz.toway.libraryservice.repository.LibraryRepository;
 import xyz.toway.libraryservice.repository.LibraryStockRepository;
 import xyz.toway.libraryservice.repository.StockRepository;
 import xyz.toway.shared.exception.WrongParamsException;
+import xyz.toway.shared.model.SharedSaleModel;
 
 import java.util.List;
 
@@ -70,12 +71,20 @@ public class StockService {
     private void checkBookExists(Long id) {
         boolean bookExists = bookServiceProxy.checkBookExists(id);
         if (!bookExists) {
-            throw new RuntimeException("No book with id=" + id);
+            throw new WrongParamsException("No book with id=" + id);
         }
     }
 
     public boolean checkBeforeSale(Long libraryId, Long bookId, Integer quantity) {
         var stockOptional = libraryStockRepository.findFirstByLibraryIdAndBookId(libraryId, bookId);
         return stockOptional.isPresent() && stockOptional.get().getQuantity() >= quantity;
+    }
+
+    public void adjustStockItem(SharedSaleModel model) {
+        var item = stockRepository.findByLibraryIdAndBookId(model.libraryId(), model.bookId())
+                .orElseThrow(() -> new WrongParamsException("No stock item."));
+        var newQuantity = Math.max(item.getQuantity() - model.quantity(), 0);
+        item.setQuantity(newQuantity);
+        stockRepository.save(item);
     }
 }
