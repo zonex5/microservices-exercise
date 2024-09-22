@@ -75,7 +75,7 @@ public class StockService {
     }
 
     public boolean checkBeforeSale(Long libraryId, Long bookId, Integer quantity) {
-        var stockOptional = libraryStockRepository.findFirstByIdAndBookId(libraryId, bookId);
+        var stockOptional = libraryStockRepository.findFirstByLibraryIdAndBookId(libraryId, bookId);
         return stockOptional.isPresent() && stockOptional.get().getQuantity() >= quantity;
     }
 }

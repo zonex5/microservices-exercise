@@ -36,7 +36,7 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
-    implementation project(":shared-module")
+    implementation project(':shared-module')
 }
 
 dependencyManagement {

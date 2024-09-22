@@ -1,13 +1,16 @@
 package xyz.toway.sales.service;
 
 import jakarta.validation.Valid;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import xyz.toway.sales.config.RabbitMQConfig;
 import xyz.toway.sales.entity.SaleEntity;
 import xyz.toway.sales.model.SaleModel;
 import xyz.toway.sales.proxy.LibraryServiceProxy;
 import xyz.toway.sales.repository.SaleRepository;
 import xyz.toway.shared.exception.WrongParamsException;
+import xyz.toway.shared.model.SharedSaleModel;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,10 +21,12 @@ public class SaleService {
 
     private final SaleRepository saleRepository;
     private final LibraryServiceProxy libraryServiceProxy;
+    private final AmqpTemplate qpTemplate;
 
-    public SaleService(@Autowired SaleRepository saleRepository, @Autowired LibraryServiceProxy libraryServiceProxy) {
+    public SaleService(@Autowired SaleRepository saleRepository, @Autowired LibraryServiceProxy libraryServiceProxy, @Autowired AmqpTemplate amqpTemplate) {
         this.saleRepository = saleRepository;
         this.libraryServiceProxy = libraryServiceProxy;
+        this.qpTemplate = amqpTemplate;
     }
 
     public List<SaleModel> getAllSales() {
@@ -32,14 +37,26 @@ public class SaleService {
     }
 
     public void deleteSale(Long id) {
+
+        var sale = saleRepository.findById(id).orElseThrow(() -> new WrongParamsException("No sale with id=" + id));
+
+        //delete from db
         saleRepository.deleteById(id);
+
+        // send message about delete sale
+        qpTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.DELETE_ROUTING_KEY, createSharedSaleModel(sale));
     }
 
     public SaleModel createSale(@Valid SaleModel sale) {
         //check library id, book id, quantity from stock
         if (libraryServiceProxy.checkBeforeSale(sale.libraryId(), sale.bookId(), sale.quantity())) {
             SaleEntity entity = createSaleEntity(sale);
-            return createSaleModel(saleRepository.save(entity));
+            var saleResult = createSaleModel(saleRepository.save(entity));
+
+            // send message about new sale
+            qpTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ADD_ROUTING_KEY, createSharedSaleModel(saleResult));
+
+            return saleResult;
         } else {
             throw new WrongParamsException("Invalid parameters or insufficient quantity of books.");
         }
@@ -76,5 +93,13 @@ public class SaleService {
                 model.quantity(),
                 Objects.requireNonNullElse(model.saleDate(), LocalDateTime.now())
         );
+    }
+
+    private SharedSaleModel createSharedSaleModel(SaleModel model) {
+        return new SharedSaleModel(model.libraryId(), model.bookId(), model.quantity());
+    }
+
+    private SharedSaleModel createSharedSaleModel(SaleEntity entity) {
+        return new SharedSaleModel(entity.getLibraryId(), entity.getBookId(), entity.getQuantity());
     }
 }
