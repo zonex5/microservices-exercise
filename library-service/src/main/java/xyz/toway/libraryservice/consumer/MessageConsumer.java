@@ -1,9 +1,10 @@
-package xyz.toway.libraryservice.service;
+package xyz.toway.libraryservice.consumer;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import xyz.toway.libraryservice.service.StockService;
 import xyz.toway.shared.model.SharedSaleModel;
 import xyz.toway.shared.other.RabbitMQConstants;
 

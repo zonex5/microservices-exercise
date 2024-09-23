@@ -45,7 +45,7 @@ public class SaleController {
         }
     }
 
-    @PutMapping("/{id}")
+    /*@PutMapping("/{id}")
     private ResponseEntity<?> updateSale(@Valid SaleModel sale, @PathVariable Long id) { //todo remove
         try {
             return ResponseEntity.ok(saleService.updateSale(sale, id));
@@ -53,7 +53,7 @@ public class SaleController {
             log.error(e);
             return ResponseEntity.badRequest().build();
         }
-    }
+    }*/
 
     @DeleteMapping("/{id}")
     private ResponseEntity<?> deleteSale(@PathVariable Long id) {

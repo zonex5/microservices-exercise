@@ -62,7 +62,7 @@ public class SaleService {
         }
     }
 
-    public SaleModel updateSale(SaleModel sale, Long id) { //todo remove
+    /*public SaleModel updateSale(SaleModel sale, Long id) { //todo remove
         SaleEntity existingSale = saleRepository.findById(id)
                 .orElseThrow(() -> new WrongParamsException("The sale with id=" + id + " does not exist."));
 
@@ -73,7 +73,7 @@ public class SaleService {
         existingSale.setBookId(sale.bookId());
         existingSale.setLibraryId(sale.libraryId());
         return createSaleModel(saleRepository.save(existingSale));
-    }
+    }*/
 
     public SaleModel getSaleById(Long id) {
         SaleEntity sale = saleRepository.findById(id)

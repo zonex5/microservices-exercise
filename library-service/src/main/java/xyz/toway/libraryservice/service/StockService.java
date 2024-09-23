@@ -83,8 +83,11 @@ public class StockService {
     public void adjustStockItem(SharedSaleModel model) {
         var item = stockRepository.findByLibraryIdAndBookId(model.libraryId(), model.bookId())
                 .orElseThrow(() -> new WrongParamsException("No stock item."));
-        var newQuantity = Math.max(item.getQuantity() - model.quantity(), 0);
-        item.setQuantity(newQuantity);
-        stockRepository.save(item);
+        if (item.getQuantity() >= model.quantity()) {
+            item.setQuantity(item.getQuantity() - model.quantity());
+            stockRepository.save(item);
+        } else {
+            throw new WrongParamsException("Insufficient quantity of books. [id=%d, quantity=%d]".formatted(model.bookId(), model.quantity()));
+        }
     }
 }
