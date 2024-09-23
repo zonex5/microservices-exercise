@@ -50,5 +50,13 @@ services:
     networks:
       - db-network
 
+  discovery:
+    image: eureka-server:0.2
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - db-network
+
 networks:
   db-network:
