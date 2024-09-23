@@ -21,8 +21,8 @@ public class AuthorController {
 
     @GetMapping
     private ResponseEntity<?> getAllAuthors() {
-        List<AuthorEntity> users = authorService.getAllAuthors();
-        return ResponseEntity.ok(users);
+        List<AuthorEntity> authors = authorService.getAllAuthors();
+        return ResponseEntity.ok(authors);
     }
 
     @GetMapping("/{id}")
@@ -32,15 +32,14 @@ public class AuthorController {
 
     @PostMapping
     private ResponseEntity<?> createAuthor(@Valid @RequestBody AuthorEntity author) {
-        AuthorEntity createdUser = authorService.saveAuthor(author);
-        return ResponseEntity.ok(createdUser);
+        AuthorEntity createdAuthor = authorService.saveAuthor(author);
+        return ResponseEntity.ok(createdAuthor);
     }
 
     @PutMapping("/{id}")
     private ResponseEntity<?> updateAuthor(@Valid @RequestBody AuthorEntity author, @PathVariable Long id) {
-        author.setId(id);  //todo
-        AuthorEntity createdUser = authorService.saveAuthor(author);
-        return ResponseEntity.ok(createdUser);
+        AuthorEntity updatedAuthor = authorService.updateAuthor(author, id);
+        return ResponseEntity.ok(updatedAuthor);
     }
 
     @DeleteMapping("/{id}")

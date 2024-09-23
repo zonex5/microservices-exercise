@@ -33,12 +33,8 @@ dependencyManagement {
 	}
 }
 
-bootJar {
-    archiveFileName = 'app.jar'
-}
-
 docker {
-    name "eureka-server:0.2"
+    name "service-discovery:0.2"
     files tasks.bootJar.archiveFile.get().asFile
     buildArgs(['JAR_FILE': tasks.bootJar.archiveFileName.get()])
     dockerfile file('Dockerfile')

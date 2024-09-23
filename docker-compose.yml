@@ -1,5 +1,5 @@
 services:
-  postgres1:
+  postgres-16-books:
     image: postgres:16.4-alpine3.20
     container_name: postgres-16-books
     environment:
@@ -13,7 +13,7 @@ services:
     volumes:
       - D:\DockerPostgresData\db_books:/var/lib/postgresql/data
 
-  postgres2:
+  postgres-16-library:
     image: postgres:16.4-alpine3.20
     container_name: postgres-16-library
     environment:
@@ -23,11 +23,11 @@ services:
     ports:
       - "5434:5432"
     networks:
-      - db-network  
+      - db-network
     volumes:
       - D:\DockerPostgresData\db_library:/var/lib/postgresql/data
 
-  postgres3:
+  postgres-16-sales:
     image: postgres:16.4-alpine3.20
     container_name: postgres-16-sales
     environment:
@@ -37,7 +37,7 @@ services:
     ports:
       - "5435:5432"
     networks:
-      - db-network  
+      - db-network
     volumes:
       - D:\DockerPostgresData\db_sales:/var/lib/postgresql/data
 
@@ -50,13 +50,42 @@ services:
     networks:
       - db-network
 
-  discovery:
-    image: eureka-server:0.2
-    container_name: eureka-server
+  service-discovery:
+    image: service-discovery:0.2
+    container_name: service-discovery
     ports:
       - "8761:8761"
     networks:
       - db-network
 
+  api-gateway:
+    image: api-gateway:0.2
+    container_name: api-gateway
+    ports:
+      - "8080:8765"
+    networks:
+      - db-network
+    depends_on:
+      - service-discovery
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+
+  book-service:
+    image: books-service:0.1
+    ports:
+      - "50001:8010"
+    networks:
+      - db-network
+    depends_on:
+      - service-discovery
+      - api-gateway
+      - postgres-16-books
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-16-books:5432/db_books
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+
 networks:
   db-network:
+    driver: bridge

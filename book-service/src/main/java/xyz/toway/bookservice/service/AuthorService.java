@@ -6,6 +6,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import xyz.toway.bookservice.entity.AuthorEntity;
 import xyz.toway.bookservice.repository.AuthorRepository;
+import xyz.toway.shared.exception.WrongParamsException;
 
 import java.util.List;
 
@@ -32,5 +33,14 @@ public class AuthorService {
 
     public void deleteAuthor(Long id) {
         authorRepository.deleteById(id);
+    }
+
+    public AuthorEntity updateAuthor(AuthorEntity author, Long id) {
+        var entity = authorRepository.findById(id)
+                .orElseThrow(() -> new WrongParamsException("No author with id=" + id));
+        entity.setName(author.getName());
+        entity.setDateOfBirth(author.getDateOfBirth());
+        entity.setDateOfDeath(author.getDateOfDeath());
+        return authorRepository.save(entity);
     }
 }
