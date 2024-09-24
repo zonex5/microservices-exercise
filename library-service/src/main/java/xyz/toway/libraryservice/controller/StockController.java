@@ -29,6 +29,11 @@ public class StockController {
         return ResponseEntity.ok(stock);
     }
 
+    @GetMapping("/{id}")
+    private ResponseEntity<?> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(stockService.getById(id));
+    }
+
     @PostMapping
     private ResponseEntity<?> addStockItem(@Valid @RequestBody StockModel item) {
         try {

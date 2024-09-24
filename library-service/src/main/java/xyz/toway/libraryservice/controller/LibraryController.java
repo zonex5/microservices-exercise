@@ -31,6 +31,17 @@ public class LibraryController {
         return ResponseEntity.ok(libs);
     }
 
+    @GetMapping("/{id}")
+    private ResponseEntity<?> getLibraryById(@PathVariable Long id) {
+        try {
+            var library = libraryService.getLibraryById(id);
+            return ResponseEntity.ok(library);
+        } catch (WrongParamsException e) {
+            log.error(e);
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     @GetMapping("/search-by-book-ids")
     private ResponseEntity<?> getAllLibrariesByBookIds(@RequestParam("id") List<Long> ids) {
         if (ids.size() > MAX_ALLOWED_IDS) {

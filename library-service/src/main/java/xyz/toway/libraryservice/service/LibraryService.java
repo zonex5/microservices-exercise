@@ -66,4 +66,9 @@ public class LibraryService {
     public SharedLibraryStockModel createLibraryStockModel(LibraryStockEntity entity) {
         return new SharedLibraryStockModel(entity.getLibraryId(), entity.getName(), entity.getAddress(), entity.getId(), entity.getBookId(), entity.getQuantity(), entity.getPrice());
     }
+
+    public LibraryEntity getLibraryById(Long id) {
+        return libraryRepository.findById(id)
+                .orElseThrow(() -> new WrongParamsException("No library with id=" + id));
+    }
 }

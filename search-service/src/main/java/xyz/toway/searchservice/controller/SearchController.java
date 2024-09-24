@@ -1,5 +1,6 @@
 package xyz.toway.searchservice.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +22,8 @@ public class SearchController {
         this.searchService = searchService;
     }
 
+    @Operation(summary = "Searching for books by specific parameters.",
+            description = "The parameters are passed as a query string in the URL: ?q=<value to search>&by=[tag, title, author]")
     @GetMapping("/books")
     private ResponseEntity<?> searchBooks(@RequestParam Map<String, String> params) {
         try {
@@ -30,6 +33,8 @@ public class SearchController {
         }
     }
 
+    @Operation(summary = "Searching for libraries that contain books based on specific parameters.",
+            description = "The parameters are passed as a query string in the URL: ?q=<value to search>&by=[tag, title, author]")
     @GetMapping("/libraries")
     private ResponseEntity<?> searchLibraries(@RequestParam Map<String, String> params) {
         try {

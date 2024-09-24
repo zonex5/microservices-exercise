@@ -1,6 +1,7 @@
 package xyz.toway.libraryservice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import xyz.toway.libraryservice.entity.LibraryEntity;
 import xyz.toway.libraryservice.entity.StockEntity;
@@ -13,6 +14,7 @@ import xyz.toway.shared.exception.WrongParamsException;
 import xyz.toway.shared.model.SharedSaleModel;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class StockService {
@@ -31,6 +33,15 @@ public class StockService {
 
     public List<StockEntity> getAll() {
         return stockRepository.findAll();
+    }
+
+    public StockModel getById(Long id) {
+        var item = stockRepository.findById(id)
+                .orElseThrow(() -> new WrongParamsException("No stock item with id=" + id));
+        if (Objects.isNull(item.getLibrary())) {
+            throw new WrongParamsException("No library found.");
+        }
+        return new StockModel(item.getId(), item.getLibrary().getId(), item.getBookId(), item.getQuantity(), item.getPrice());
     }
 
     public StockEntity save(StockModel model) {
