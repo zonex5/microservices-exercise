@@ -1,12 +1,10 @@
 package xyz.toway.libraryservice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import xyz.toway.libraryservice.entity.LibraryEntity;
 import xyz.toway.libraryservice.entity.StockEntity;
 import xyz.toway.libraryservice.model.StockModel;
-import xyz.toway.libraryservice.proxy.BookServiceProxy;
 import xyz.toway.libraryservice.repository.LibraryRepository;
 import xyz.toway.libraryservice.repository.LibraryStockRepository;
 import xyz.toway.libraryservice.repository.StockRepository;
@@ -22,13 +20,13 @@ public class StockService {
     private final StockRepository stockRepository;
     private final LibraryRepository libraryRepository;
     private final LibraryStockRepository libraryStockRepository;
-    private final BookServiceProxy bookServiceProxy;
+    private final ProxyService proxyService;
 
-    public StockService(@Autowired StockRepository stockRepository, @Autowired LibraryRepository libraryRepository, @Autowired LibraryStockRepository libraryStockRepository, @Autowired BookServiceProxy bookServiceProxy) {
+    public StockService(@Autowired StockRepository stockRepository, @Autowired LibraryRepository libraryRepository, @Autowired LibraryStockRepository libraryStockRepository, @Autowired ProxyService proxyService) {
         this.stockRepository = stockRepository;
         this.libraryRepository = libraryRepository;
         this.libraryStockRepository = libraryStockRepository;
-        this.bookServiceProxy = bookServiceProxy;
+        this.proxyService = proxyService;
     }
 
     public List<StockEntity> getAll() {
@@ -49,7 +47,9 @@ public class StockService {
                 .orElseThrow(() -> new RuntimeException("No library with id=" + model.libraryId()));
 
         //check book
-        checkBookExists(model.bookId());
+        if (!proxyService.checkBookExists(model.bookId())) {
+            throw new WrongParamsException("No book with id=" + model.bookId());
+        }
 
         StockEntity entity = new StockEntity(model.bookId(), model.quantity(), model.price());
         entity.setLibrary(library);
@@ -64,7 +64,9 @@ public class StockService {
                 .orElseThrow(() -> new RuntimeException("No library with id=" + item.libraryId()));
 
         //check book
-        checkBookExists(item.bookId());
+        if (!proxyService.checkBookExists(item.bookId())) {
+            throw new WrongParamsException("No book with id=" + item.bookId());
+        }
 
         //refresh stock item data
         stockEntity.setLibrary(libraryEntity);
@@ -77,13 +79,6 @@ public class StockService {
 
     public void delete(Long id) {
         stockRepository.deleteById(id);
-    }
-
-    private void checkBookExists(Long id) {
-        boolean bookExists = bookServiceProxy.checkBookExists(id);
-        if (!bookExists) {
-            throw new WrongParamsException("No book with id=" + id);
-        }
     }
 
     public boolean checkBeforeSale(Long libraryId, Long bookId, Integer quantity) {

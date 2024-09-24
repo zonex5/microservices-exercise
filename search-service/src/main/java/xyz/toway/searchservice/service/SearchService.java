@@ -19,22 +19,20 @@ public class SearchService {
     private final static String SEARCH_Q = "q";
     private final static String SEARCH_BY = "by";
 
-    private final BookServiceProxy bookServiceProxy;
-    private final LibraryServiceProxy libraryServiceProxy;
+    private final ProxyService proxyService;
 
-    public SearchService(@Autowired BookServiceProxy bookServiceProxy, @Autowired LibraryServiceProxy libraryServiceProxy) {
-        this.bookServiceProxy = bookServiceProxy;
-        this.libraryServiceProxy = libraryServiceProxy;
+    public SearchService(@Autowired ProxyService proxyService) {
+        this.proxyService = proxyService;
     }
 
     public List<SearchResultModel> searchBooks(Map<String, String> params) {
         checkQueryParams(params);
 
-        var booksList = bookServiceProxy.searchBooks(params.get(SEARCH_Q), params.get(SEARCH_BY));
+        var booksList = proxyService.getBooksFromRemoteService(params.get(SEARCH_Q), params.get(SEARCH_BY));
         var booksMap = booksList.stream().collect(Collectors.toMap(SharedBookModel::id, book -> book));
 
         var ids = booksList.stream().map(SharedBookModel::id).toList();
-        var stock = libraryServiceProxy.searchStockByBookIds(ids);
+        var stock = proxyService.getStockFromRemoteService(ids);
 
         return stock.stream()
                 .map(e -> new SearchResultModel(
@@ -47,8 +45,11 @@ public class SearchService {
     public List<SharedLibraryModel> searchLibraries(Map<String, String> params) {
         checkQueryParams(params);
 
-        var ids = bookServiceProxy.searchBookIds(params.get(SEARCH_Q), params.get(SEARCH_BY));
-        return libraryServiceProxy.searchByBookIds(ids);
+        //var ids = bookServiceProxy.searchBookIds(params.get(SEARCH_Q), params.get(SEARCH_BY));
+        //return libraryServiceProxy.searchByBookIds(ids);
+
+        var ids = proxyService.getBookIdsFromRemoteService(params.get(SEARCH_Q), params.get(SEARCH_BY));
+        return proxyService.getLibrariesByBookIdsFromRemoteService(ids);
     }
 
     private static void checkQueryParams(Map<String, String> params) {

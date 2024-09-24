@@ -1,6 +1,7 @@
 package xyz.toway.searchservice.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +13,7 @@ import xyz.toway.shared.exception.WrongParamsException;
 
 import java.util.Map;
 
+@Log4j2
 @RestController
 @RequestMapping("/search")
 public class SearchController {
