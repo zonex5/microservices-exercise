@@ -3,11 +3,9 @@ package xyz.toway.searchservice.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import xyz.toway.searchservice.model.SearchResultModel;
-import xyz.toway.searchservice.proxy.BookServiceProxy;
-import xyz.toway.searchservice.proxy.LibraryServiceProxy;
+import xyz.toway.shared.exception.WrongParamsException;
 import xyz.toway.shared.model.SharedBookModel;
 import xyz.toway.shared.model.SharedLibraryModel;
-import xyz.toway.shared.exception.WrongParamsException;
 
 import java.util.List;
 import java.util.Map;
@@ -44,9 +42,6 @@ public class SearchService {
 
     public List<SharedLibraryModel> searchLibraries(Map<String, String> params) {
         checkQueryParams(params);
-
-        //var ids = bookServiceProxy.searchBookIds(params.get(SEARCH_Q), params.get(SEARCH_BY));
-        //return libraryServiceProxy.searchByBookIds(ids);
 
         var ids = proxyService.getBookIdsFromRemoteService(params.get(SEARCH_Q), params.get(SEARCH_BY));
         return proxyService.getLibrariesByBookIdsFromRemoteService(ids);

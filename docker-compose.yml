@@ -2,10 +2,11 @@ services:
   postgres-16-books:
     image: postgres:16.4-alpine3.20
     container_name: postgres-16-books
+    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
+      POSTGRES_DB: postgres #todo
     ports:
       - "5433:5432"
     networks:
@@ -16,6 +17,7 @@ services:
   postgres-16-library:
     image: postgres:16.4-alpine3.20
     container_name: postgres-16-library
+    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -30,6 +32,7 @@ services:
   postgres-16-sales:
     image: postgres:16.4-alpine3.20
     container_name: postgres-16-sales
+    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -44,6 +47,7 @@ services:
   rabbitmq:
     image: rabbitmq:management-alpine
     container_name: rabbitmq
+    restart: always
     ports:
       - "5672:5672"
       - "15672:15672"
