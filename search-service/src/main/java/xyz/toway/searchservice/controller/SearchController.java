@@ -23,7 +23,11 @@ public class SearchController {
 
     @GetMapping("/books")
     private ResponseEntity<?> searchBooks(@RequestParam Map<String, String> params) {
-        return ResponseEntity.ok(searchService.searchBooks(params));
+        try {
+            return ResponseEntity.ok(searchService.searchBooks(params));
+        } catch (WrongParamsException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/libraries")

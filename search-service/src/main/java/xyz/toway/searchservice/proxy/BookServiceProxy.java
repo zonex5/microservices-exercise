@@ -11,8 +11,8 @@ import java.util.List;
 public interface BookServiceProxy {
 
     @GetMapping("/books/search")
-    List<SharedBookModel> searchBooks(@RequestParam("q") String value, @RequestParam("type") String type);
+    List<SharedBookModel> searchBooks(@RequestParam("q") String value, @RequestParam("by") String type);
 
     @GetMapping("/books/search-ids")
-    List<Long> searchBookIds(@RequestParam("q") String value, @RequestParam("type") String type);
+    List<Long> searchBookIds(@RequestParam("q") String value, @RequestParam("by") String type);
 }

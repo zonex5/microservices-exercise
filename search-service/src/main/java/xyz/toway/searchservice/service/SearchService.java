@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class SearchService {
 
     private final static String SEARCH_Q = "q";
-    private final static String SEARCH_TYPE = "type";
+    private final static String SEARCH_BY = "by";
 
     private final BookServiceProxy bookServiceProxy;
     private final LibraryServiceProxy libraryServiceProxy;
@@ -30,7 +30,7 @@ public class SearchService {
     public List<SearchResultModel> searchBooks(Map<String, String> params) {
         checkQueryParams(params);
 
-        var booksList = bookServiceProxy.searchBooks(params.get(SEARCH_Q), params.get(SEARCH_TYPE));
+        var booksList = bookServiceProxy.searchBooks(params.get(SEARCH_Q), params.get(SEARCH_BY));
         var booksMap = booksList.stream().collect(Collectors.toMap(SharedBookModel::id, book -> book));
 
         var ids = booksList.stream().map(SharedBookModel::id).toList();
@@ -47,13 +47,13 @@ public class SearchService {
     public List<SharedLibraryModel> searchLibraries(Map<String, String> params) {
         checkQueryParams(params);
 
-        var ids = bookServiceProxy.searchBookIds(params.get(SEARCH_Q), params.get(SEARCH_TYPE));
+        var ids = bookServiceProxy.searchBookIds(params.get(SEARCH_Q), params.get(SEARCH_BY));
         return libraryServiceProxy.searchByBookIds(ids);
     }
 
     private static void checkQueryParams(Map<String, String> params) {
-        if (params == null || !params.containsKey(SEARCH_Q) || !params.containsKey(SEARCH_TYPE)) {
-            throw new WrongParamsException("The search parameters are incorrect.");
+        if (params == null || !params.containsKey(SEARCH_Q) || !params.containsKey(SEARCH_BY)) {
+            throw new WrongParamsException("The search parameters are incorrect. Missed required param 'q=' or 'by=' (tag, title, author)");
         }
     }
 }

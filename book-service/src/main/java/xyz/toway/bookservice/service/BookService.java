@@ -20,7 +20,7 @@ import java.util.Objects;
 public class BookService {
 
     private final static String SEARCH_Q = "q";
-    private final static String SEARCH_TYPE = "type";
+    private final static String SEARCH_BY = "by";
 
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
@@ -61,7 +61,7 @@ public class BookService {
     public List<SharedBookModel> searchBooks(Map<String, String> params) {
         checkQueryParams(params);
         String q = params.get(SEARCH_Q);
-        return switch (params.get(SEARCH_TYPE)) {
+        return switch (params.get(SEARCH_BY)) {
             case "tag" -> bookRepository.findByTag(q)
                     .stream()
                     .map(this::createSharedBookModel)
@@ -81,7 +81,7 @@ public class BookService {
     public List<Long> searchBooksIds(Map<String, String> params) {
         checkQueryParams(params);
         String q = params.get(SEARCH_Q);
-        return switch (params.get(SEARCH_TYPE)) {
+        return switch (params.get(SEARCH_BY)) {
             case "tag" -> bookRepository.findByTag(q)
                     .stream()
                     .map(BookEntity::getId)
@@ -134,7 +134,7 @@ public class BookService {
     }
 
     private static void checkQueryParams(Map<String, String> params) {
-        if (params == null || !params.containsKey(SEARCH_Q) || !params.containsKey(SEARCH_TYPE)) {
+        if (params == null || !params.containsKey(SEARCH_Q) || !params.containsKey(SEARCH_BY)) {
             throw new RuntimeException("The search parameters are incorrect.");
         }
     }

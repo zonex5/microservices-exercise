@@ -73,7 +73,7 @@ services:
   book-service:
     image: books-service:0.1
     ports:
-      - "50001:8010"
+      - "8010:8010"
     networks:
       - db-network
     depends_on:
@@ -85,6 +85,52 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-16-books:5432/db_books
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
+
+  library-service:
+    image: library-service:0.1
+    ports:
+      - "8020:8020"
+    networks:
+      - db-network
+    depends_on:
+      - service-discovery
+      - api-gateway
+      - postgres-16-library
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-16-library:5432/db_library
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+
+  sale-service:
+    image: sale-service:0.1
+    ports:
+      - "8040:8040"
+    networks:
+      - db-network
+    depends_on:
+      - service-discovery
+      - api-gateway
+      - postgres-16-sales
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-16-sales:5432/db_sales
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+
+  seacrh-service:
+    image: search-service:0.1
+    ports:
+      - "8030:8030"
+    networks:
+      - db-network
+    depends_on:
+      - service-discovery
+      - api-gateway
+      - library-service
+      - book-service
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
 
 networks:
   db-network:
