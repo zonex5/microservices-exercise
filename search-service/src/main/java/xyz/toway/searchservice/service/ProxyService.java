@@ -2,11 +2,9 @@ package xyz.toway.searchservice.service;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import xyz.toway.searchservice.proxy.BookServiceProxy;
 import xyz.toway.searchservice.proxy.LibraryServiceProxy;
-import xyz.toway.shared.exception.AccessRemoteServiceException;
 import xyz.toway.shared.model.SharedBookModel;
 import xyz.toway.shared.model.SharedLibraryModel;
 import xyz.toway.shared.model.SharedLibraryStockModel;

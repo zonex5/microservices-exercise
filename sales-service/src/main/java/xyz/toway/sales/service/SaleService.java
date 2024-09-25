@@ -43,13 +43,13 @@ public class SaleService {
         //delete from db
         saleRepository.deleteById(id);
 
-        // send message about delete sale
+        // send message about deleted sale item
         qpTemplate.convertAndSend(RabbitMQConstants.EXCHANGE_NAME, RabbitMQConstants.DELETE_ROUTING_KEY, createSharedSaleModel(sale));
     }
 
     public SaleModel createSale(@Valid SaleModel sale) {
         //check library id, book id, quantity from stock
-        if (libraryServiceProxy.checkBeforeSale(sale.libraryId(), sale.bookId(), sale.quantity())) {
+        if (libraryServiceProxy.checkStockBeforeSale(sale.libraryId(), sale.bookId(), sale.quantity())) {
             SaleEntity entity = createSaleEntity(sale);
             var saleResult = createSaleModel(saleRepository.save(entity));
 
@@ -61,19 +61,6 @@ public class SaleService {
             throw new WrongParamsException("Invalid parameters or insufficient quantity of books.");
         }
     }
-
-    /*public SaleModel updateSale(SaleModel sale, Long id) { //todo remove
-        SaleEntity existingSale = saleRepository.findById(id)
-                .orElseThrow(() -> new WrongParamsException("The sale with id=" + id + " does not exist."));
-
-        //todo check library id, book id, quantity from stock
-
-        existingSale.setSaleDate(sale.saleDate());
-        existingSale.setQuantity(sale.quantity());
-        existingSale.setBookId(sale.bookId());
-        existingSale.setLibraryId(sale.libraryId());
-        return createSaleModel(saleRepository.save(existingSale));
-    }*/
 
     public SaleModel getSaleById(Long id) {
         SaleEntity sale = saleRepository.findById(id)

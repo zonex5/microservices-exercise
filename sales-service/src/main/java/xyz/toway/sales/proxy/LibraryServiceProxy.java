@@ -8,5 +8,5 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface LibraryServiceProxy {
 
     @GetMapping("/stock/check")
-    boolean checkBeforeSale(@RequestParam("libraryId") Long libraryId, @RequestParam("bookId") Long bookId, @RequestParam("quantity") Integer quantity);
+    boolean checkStockBeforeSale(@RequestParam("libraryId") Long libraryId, @RequestParam("bookId") Long bookId, @RequestParam("quantity") Integer quantity);
 }
