@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import xyz.toway.libraryservice.entity.StockEntity;
 import xyz.toway.libraryservice.model.StockModel;
 import xyz.toway.libraryservice.service.StockService;
+import xyz.toway.shared.exception.WrongParamsException;
 
 import java.util.List;
 
@@ -16,6 +17,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/stock")
 public class StockController {
+
+    private final String GENERAL_ERROR = "Something went wrong.";
 
     private final StockService stockService;
 
@@ -25,45 +28,65 @@ public class StockController {
 
     @GetMapping
     private ResponseEntity<?> getAll() {
-        List<StockEntity> stock = stockService.getAll();
-        return ResponseEntity.ok(stock);
+        try {
+            return ResponseEntity.ok(stockService.getAll());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(GENERAL_ERROR);
+        }
     }
 
     @GetMapping("/{id}")
     private ResponseEntity<?> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(stockService.getById(id));
+        try {
+            return ResponseEntity.ok(stockService.getById(id));
+        } catch (WrongParamsException e) {
+            log.error(e);
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(GENERAL_ERROR);
+        }
     }
 
     @PostMapping
     private ResponseEntity<?> addStockItem(@Valid @RequestBody StockModel item) {
         try {
-            StockEntity stockEntity = stockService.save(item);
-            return ResponseEntity.ok(stockEntity);
-        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.ok(stockService.save(item));
+        } catch (DataIntegrityViolationException | WrongParamsException e) {
             log.error(e);
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(GENERAL_ERROR);
         }
     }
 
     @PutMapping("/{id}")
     private ResponseEntity<?> updateStockItem(@Valid @RequestBody StockModel item, @PathVariable Long id) {
         try {
-            StockEntity stockEntity = stockService.update(item, id);
-            return ResponseEntity.ok(stockEntity);
-        } catch (RuntimeException e) {
+            return ResponseEntity.ok(stockService.update(item, id));
+        } catch (WrongParamsException e) {
             log.error(e);
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(GENERAL_ERROR);
         }
     }
 
     @DeleteMapping("/{id}")
     private ResponseEntity<?> deleteStockItem(@PathVariable Long id) {
-        stockService.delete(id);
-        return ResponseEntity.ok().build();
+        try {
+            stockService.delete(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(GENERAL_ERROR);
+        }
     }
 
     @GetMapping("/check")
     private ResponseEntity<?> checkBeforeSale(@RequestParam("libraryId") Long libraryId, @RequestParam("bookId") Long bookId, @RequestParam("quantity") Integer quantity) {
-        return ResponseEntity.ok(stockService.checkBeforeSale(libraryId, bookId, quantity));
+        try {
+            return ResponseEntity.ok(stockService.checkBeforeSale(libraryId, bookId, quantity));
+        } catch (Exception e) {
+            return ResponseEntity.ok(false);
+        }
     }
 }

@@ -22,7 +22,10 @@ public class StockService {
     private final LibraryStockRepository libraryStockRepository;
     private final ProxyService proxyService;
 
-    public StockService(@Autowired StockRepository stockRepository, @Autowired LibraryRepository libraryRepository, @Autowired LibraryStockRepository libraryStockRepository, @Autowired ProxyService proxyService) {
+    public StockService(@Autowired StockRepository stockRepository,
+                        @Autowired LibraryRepository libraryRepository,
+                        @Autowired LibraryStockRepository libraryStockRepository,
+                        @Autowired ProxyService proxyService) {
         this.stockRepository = stockRepository;
         this.libraryRepository = libraryRepository;
         this.libraryStockRepository = libraryStockRepository;
@@ -44,7 +47,7 @@ public class StockService {
 
     public StockEntity save(StockModel model) {
         LibraryEntity library = libraryRepository.findById(model.libraryId())
-                .orElseThrow(() -> new RuntimeException("No library with id=" + model.libraryId()));
+                .orElseThrow(() -> new WrongParamsException("No library with id=" + model.libraryId()));
 
         //check book
         if (!proxyService.checkBookExists(model.bookId())) {
@@ -59,9 +62,9 @@ public class StockService {
 
     public StockEntity update(StockModel item, Long id) {
         StockEntity stockEntity = stockRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("No stock item with id=" + id));
+                .orElseThrow(() -> new WrongParamsException("No stock item with id=" + id));
         LibraryEntity libraryEntity = libraryRepository.findById(item.libraryId())
-                .orElseThrow(() -> new RuntimeException("No library with id=" + item.libraryId()));
+                .orElseThrow(() -> new WrongParamsException("No library with id=" + item.libraryId()));
 
         //check book
         if (!proxyService.checkBookExists(item.bookId())) {
@@ -86,6 +89,9 @@ public class StockService {
         return stockOptional.isPresent() && stockOptional.get().getQuantity() >= quantity;
     }
 
+    /**
+     * Used by RabbitMQ
+     */
     public void adjustStockItem(SharedSaleModel model) {
         var item = stockRepository.findByLibraryIdAndBookId(model.libraryId(), model.bookId())
                 .orElseThrow(() -> new WrongParamsException("No stock item."));

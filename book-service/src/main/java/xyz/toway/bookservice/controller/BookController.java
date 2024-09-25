@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import xyz.toway.bookservice.entity.BookEntity;
 import xyz.toway.bookservice.model.BookModel;
 import xyz.toway.bookservice.service.BookService;
+import xyz.toway.shared.exception.WrongParamsException;
 import xyz.toway.shared.model.SharedBookModel;
 
 import java.util.List;
@@ -16,6 +17,8 @@ import java.util.Map;
 @RequestMapping("/books")
 public class BookController {
 
+    private final String GENERAL_ERROR = "Something went wrong.";
+
     private final BookService bookService;
 
     public BookController(@Autowired BookService bookService) {
@@ -24,20 +27,36 @@ public class BookController {
 
     @GetMapping
     public ResponseEntity<?> getAllBooks() {
-        List<BookEntity> users = bookService.getAllBooks();
-        return ResponseEntity.ok(users);
+        try {
+            List<BookEntity> users = bookService.getAllBooks();
+            return ResponseEntity.ok(users);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(GENERAL_ERROR);
+        }
     }
 
     @GetMapping("/search")
     public ResponseEntity<?> searchBooks(@RequestParam Map<String, String> params) {
-        List<SharedBookModel> books = bookService.searchBooks(params);
-        return ResponseEntity.ok(books);
+        try {
+            List<SharedBookModel> books = bookService.searchBooks(params);
+            return ResponseEntity.ok(books);
+        } catch (WrongParamsException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(GENERAL_ERROR);
+        }
     }
 
     @GetMapping("/search-ids")
     public ResponseEntity<?> searchBooksIds(@RequestParam Map<String, String> params) {
-        List<Long> ids = bookService.searchBooksIds(params);
-        return ResponseEntity.ok(ids);
+        try {
+            List<Long> ids = bookService.searchBooksIds(params);
+            return ResponseEntity.ok(ids);
+        } catch (WrongParamsException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(GENERAL_ERROR);
+        }
     }
 
     @PostMapping
@@ -45,8 +64,10 @@ public class BookController {
         try {
             BookEntity bookEntity = bookService.saveBook(book);
             return ResponseEntity.ok(bookEntity);
-        } catch (RuntimeException e) {
+        } catch (WrongParamsException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(GENERAL_ERROR);
         }
     }
 
@@ -55,24 +76,40 @@ public class BookController {
         try {
             BookEntity bookEntity = bookService.updateBook(book, id);
             return ResponseEntity.ok(bookEntity);
-        } catch (RuntimeException e) {
+        } catch (WrongParamsException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(GENERAL_ERROR);
         }
     }
 
     @DeleteMapping("/{id}")
     private ResponseEntity<?> deleteBook(@PathVariable Long id) {
-        bookService.deleteBook(id);
-        return ResponseEntity.ok().build();
+        try {
+            bookService.deleteBook(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(GENERAL_ERROR);
+        }
     }
 
     @GetMapping("/{id}")
     private ResponseEntity<?> getBook(@PathVariable Long id) {
-        return ResponseEntity.ok(bookService.getBook(id));
+        try {
+            return ResponseEntity.ok(bookService.getBook(id));
+        } catch (WrongParamsException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(GENERAL_ERROR);
+        }
     }
 
     @GetMapping("/exists/{id}")
-    private ResponseEntity<?> chekBook(@PathVariable Long id) {
-        return ResponseEntity.ok(bookService.bookExists(id));
+    private ResponseEntity<?> checkBook(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(bookService.bookExists(id));
+        } catch (Exception e) {
+            return ResponseEntity.ok(false);
+        }
     }
 }

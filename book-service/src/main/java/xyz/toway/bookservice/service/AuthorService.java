@@ -28,7 +28,7 @@ public class AuthorService {
     }
 
     public AuthorEntity getAuthor(Long id) {
-        return authorRepository.findById(id).orElseThrow();
+        return authorRepository.findById(id).orElseThrow(() -> new WrongParamsException("No author with id=" + id));
     }
 
     public void deleteAuthor(Long id) {

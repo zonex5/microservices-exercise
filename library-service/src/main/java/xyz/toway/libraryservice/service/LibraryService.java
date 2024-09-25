@@ -39,7 +39,7 @@ public class LibraryService {
 
     public LibraryEntity updateLibrary(LibraryEntity library, Long id) {
         var existingLibrary = libraryRepository.findById(id)
-                .orElseThrow(() -> new WrongParamsException("The library with id=" + id + " does not exist."));
+                .orElseThrow(() -> new WrongParamsException("No library with id=" + id));
         existingLibrary.setName(library.getName());
         existingLibrary.setAddress(library.getAddress());
         return libraryRepository.save(existingLibrary);
@@ -60,16 +60,24 @@ public class LibraryService {
                 .toList();
     }
 
-    public SharedLibraryModel createLibraryModel(LibraryStockEntity entity) {
-        return new SharedLibraryModel(entity.getLibraryId(), entity.getName(), entity.getAddress());
-    }
-
-    public SharedLibraryStockModel createLibraryStockModel(LibraryStockEntity entity) {
-        return new SharedLibraryStockModel(entity.getLibraryId(), entity.getName(), entity.getAddress(), entity.getId(), entity.getBookId(), entity.getQuantity(), entity.getPrice());
-    }
-
     public LibraryEntity getLibraryById(Long id) {
         return libraryRepository.findById(id)
                 .orElseThrow(() -> new WrongParamsException("No library with id=" + id));
+    }
+
+    private SharedLibraryModel createLibraryModel(LibraryStockEntity entity) {
+        return new SharedLibraryModel(entity.getLibraryId(), entity.getName(), entity.getAddress());
+    }
+
+    private SharedLibraryStockModel createLibraryStockModel(LibraryStockEntity entity) {
+        return new SharedLibraryStockModel(
+                entity.getLibraryId(),
+                entity.getName(),
+                entity.getAddress(),
+                entity.getId(),
+                entity.getBookId(),
+                entity.getQuantity(),
+                entity.getPrice()
+        );
     }
 }

@@ -8,6 +8,7 @@ import xyz.toway.bookservice.entity.BookEntity;
 import xyz.toway.bookservice.model.BookModel;
 import xyz.toway.bookservice.repository.AuthorRepository;
 import xyz.toway.bookservice.repository.BookRepository;
+import xyz.toway.shared.exception.WrongParamsException;
 import xyz.toway.shared.model.SharedAuthorModel;
 import xyz.toway.shared.model.SharedBookModel;
 
@@ -30,24 +31,27 @@ public class BookService {
         this.authorRepository = authorRepository;
     }
 
-    public BookEntity saveBook(@Valid BookEntity book) {
-        return bookRepository.save(book);
-    }
-
     public BookEntity saveBook(@Valid BookModel book) {
-        var opt = authorRepository.findById(book.authorId());
-        if (opt.isPresent()) {
-            var bk = createBookEntity(book);
-            bk.setAuthor(opt.get());
-            return bookRepository.save(bk);
-        } else {
-            throw new RuntimeException("No author with id=" + book.authorId());
-        }
+        var author = authorRepository.findById(book.authorId())
+                .orElseThrow(() -> new WrongParamsException("No author with id=" + book.authorId()));
+
+        var bk = createBookEntity(book);
+        bk.setAuthor(author);
+        return bookRepository.save(bk);
     }
 
     public BookEntity updateBook(@Valid BookModel book, Long id) {
-        var updatedBook = new BookModel(id, book.authorId(), book.title(), book.edition(), book.tags());
-        return saveBook(updatedBook);
+        var bookEntity = bookRepository.findById(id)
+                .orElseThrow(() -> new WrongParamsException("No Book with id=" + id));
+
+        var author = authorRepository.findById(book.authorId())
+                .orElseThrow(() -> new WrongParamsException("No author with id=" + book.authorId()));
+
+        bookEntity.setTitle(book.title());
+        bookEntity.setEdition(book.edition());
+        bookEntity.setTags(book.tags());
+        bookEntity.setAuthor(author);
+        return bookRepository.save(bookEntity);
     }
 
     public List<BookEntity> getAllBooks() {
@@ -99,7 +103,7 @@ public class BookService {
     }
 
     public BookEntity getBook(Long id) {
-        return bookRepository.findById(id).orElseThrow();
+        return bookRepository.findById(id).orElseThrow(() -> new WrongParamsException("No Book with id=" + id));
     }
 
     public boolean bookExists(Long id) {
@@ -135,7 +139,7 @@ public class BookService {
 
     private static void checkQueryParams(Map<String, String> params) {
         if (params == null || !params.containsKey(SEARCH_Q) || !params.containsKey(SEARCH_BY)) {
-            throw new RuntimeException("The search parameters are incorrect.");
+            throw new WrongParamsException("The search parameters are incorrect.");
         }
     }
 }
