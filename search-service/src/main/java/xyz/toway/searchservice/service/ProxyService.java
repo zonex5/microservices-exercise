@@ -1,10 +1,13 @@
 package xyz.toway.searchservice.service;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import xyz.toway.searchservice.proxy.BookServiceProxy;
 import xyz.toway.searchservice.proxy.LibraryServiceProxy;
+import xyz.toway.shared.exception.RateLimitExceededException;
 import xyz.toway.shared.model.SharedBookModel;
 import xyz.toway.shared.model.SharedLibraryModel;
 import xyz.toway.shared.model.SharedLibraryStockModel;
@@ -24,6 +27,8 @@ public class ProxyService {
         this.libraryServiceProxy = libraryServiceProxy;
     }
 
+    @RateLimiter(name = "remote-service", fallbackMethod = "rateLimiterFallback")
+    @Retry(name = "remote-service")
     @CircuitBreaker(name = "book-service", fallbackMethod = "bookFallbackMethod")
     public List<SharedBookModel> getBooksFromRemoteService(String q, String by) {
         return bookServiceProxy.searchBooks(q, by);
@@ -35,6 +40,8 @@ public class ProxyService {
         return Collections.emptyList();
     }
 
+    @RateLimiter(name = "remote-service", fallbackMethod = "rateLimiterIdsFallback")
+    @Retry(name = "remote-service")
     @CircuitBreaker(name = "library-service", fallbackMethod = "stockFallbackMethod")
     public List<SharedLibraryStockModel> getStockFromRemoteService(List<Long> ids) {
         return libraryServiceProxy.searchStockByBookIds(ids);
@@ -46,6 +53,8 @@ public class ProxyService {
         return Collections.emptyList();
     }
 
+    @RateLimiter(name = "remote-service", fallbackMethod = "rateLimiterFallback")
+    @Retry(name = "remote-service")
     @CircuitBreaker(name = "book-service", fallbackMethod = "bookIdsFallbackMethod")
     public List<Long> getBookIdsFromRemoteService(String q, String by) {
         return bookServiceProxy.searchBookIds(q, by);
@@ -57,6 +66,8 @@ public class ProxyService {
         return Collections.emptyList();
     }
 
+    @RateLimiter(name = "remote-service", fallbackMethod = "rateLimiterIdsFallback")
+    @Retry(name = "remote-service")
     @CircuitBreaker(name = "library-service", fallbackMethod = "librariesByBookIdsFallbackMethod")
     public List<SharedLibraryModel> getLibrariesByBookIdsFromRemoteService(List<Long> ids) {
         return libraryServiceProxy.searchByBookIds(ids);
@@ -66,5 +77,15 @@ public class ProxyService {
     public List<SharedLibraryModel> librariesByBookIdsFallbackMethod(List<Long> ids, Throwable t) {
         log.error(t.getMessage());
         return Collections.emptyList();
+    }
+
+    @SuppressWarnings("unused")
+    public String rateLimiterFallback(String q, String by, Throwable throwable) {
+        throw new RateLimitExceededException("Request limit exceeded. Please try again later.");
+    }
+
+    @SuppressWarnings("unused")
+    public String rateLimiterIdsFallback(List<Long> ids, Throwable throwable) {
+        throw new RateLimitExceededException("Request limit exceeded. Please try again later.");
     }
 }

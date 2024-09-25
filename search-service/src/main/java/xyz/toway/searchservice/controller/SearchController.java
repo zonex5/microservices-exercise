@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import xyz.toway.searchservice.service.SearchService;
+import xyz.toway.shared.exception.RateLimitExceededException;
 import xyz.toway.shared.exception.WrongParamsException;
 
 import java.util.Map;
@@ -30,7 +31,7 @@ public class SearchController {
     private ResponseEntity<?> searchBooks(@RequestParam Map<String, String> params) {
         try {
             return ResponseEntity.ok(searchService.searchBooks(params));
-        } catch (WrongParamsException e) {
+        } catch (WrongParamsException | RateLimitExceededException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -41,7 +42,7 @@ public class SearchController {
     private ResponseEntity<?> searchLibraries(@RequestParam Map<String, String> params) {
         try {
             return ResponseEntity.ok(searchService.searchLibraries(params));
-        } catch (WrongParamsException e) {
+        } catch (WrongParamsException | RateLimitExceededException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import xyz.toway.sales.entity.SaleEntity;
 import xyz.toway.sales.model.SaleModel;
-import xyz.toway.sales.proxy.LibraryServiceProxy;
 import xyz.toway.sales.repository.SaleRepository;
 import xyz.toway.shared.exception.WrongParamsException;
 import xyz.toway.shared.model.SharedSaleModel;
@@ -20,13 +19,13 @@ import java.util.Objects;
 public class SaleService {
 
     private final SaleRepository saleRepository;
-    private final LibraryServiceProxy libraryServiceProxy;
     private final AmqpTemplate qpTemplate;
+    private final ProxyService proxyService;
 
-    public SaleService(@Autowired SaleRepository saleRepository, @Autowired LibraryServiceProxy libraryServiceProxy, @Autowired AmqpTemplate amqpTemplate) {
+    public SaleService(@Autowired SaleRepository saleRepository, @Autowired AmqpTemplate amqpTemplate, @Autowired ProxyService proxyService) {
         this.saleRepository = saleRepository;
-        this.libraryServiceProxy = libraryServiceProxy;
         this.qpTemplate = amqpTemplate;
+        this.proxyService = proxyService;
     }
 
     public List<SaleModel> getAllSales() {
@@ -49,11 +48,14 @@ public class SaleService {
 
     public SaleModel createSale(@Valid SaleModel sale) {
         //check library id, book id, quantity from stock
-        if (libraryServiceProxy.checkStockBeforeSale(sale.libraryId(), sale.bookId(), sale.quantity())) {
+        var canCreateSaleItem = proxyService.checkStockBeforeSale(sale.libraryId(), sale.bookId(), sale.quantity());
+        if (canCreateSaleItem) {
+
+            //save new sale item to db
             SaleEntity entity = createSaleEntity(sale);
-            var saleResult = createSaleModel(saleRepository.save(entity));
 
             // send message about new sale
+            var saleResult = createSaleModel(saleRepository.save(entity));
             qpTemplate.convertAndSend(RabbitMQConstants.EXCHANGE_NAME, RabbitMQConstants.ADD_ROUTING_KEY, createSharedSaleModel(saleResult));
 
             return saleResult;
