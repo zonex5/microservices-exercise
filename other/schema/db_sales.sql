@@ -70,3 +70,5 @@ VALUES
 (48, 5, 40, 2, '2024-08-20 13:50:00'), -- 'Life on the Mississippi'
 (49, 5, 45, 1, '2024-09-25 15:10:00'), -- 'To Have and Have Not'
 (50, 5, 50, 1, '2024-10-30 12:45:00'); -- 'The Last Tycoon'
+
+SELECT setval('sales_id_seq', (SELECT MAX(id) FROM sales));

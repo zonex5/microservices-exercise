@@ -2,6 +2,7 @@ package xyz.toway.sales.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.amqp.AmqpException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,12 +43,20 @@ public class SaleController {
         } catch (WrongParamsException e) {
             log.error(e);
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (AmqpException e) {
+            log.error("RabbitMQ exception:", e);
+            return ResponseEntity.badRequest().build();
         }
     }
 
     @DeleteMapping("/{id}")
     private ResponseEntity<?> deleteSale(@PathVariable Long id) {
-        saleService.deleteSale(id);
-        return ResponseEntity.ok().build();
+        try {
+            saleService.deleteSale(id);
+            return ResponseEntity.ok().build();
+        } catch (WrongParamsException e) {
+            log.error(e);
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

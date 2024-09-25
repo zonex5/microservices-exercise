@@ -1,6 +1,7 @@
 package xyz.toway.searchservice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import xyz.toway.searchservice.model.SearchResultModel;
 import xyz.toway.shared.exception.WrongParamsException;
@@ -13,6 +14,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class SearchService {
+
+    @Value("${eureka.instance.instance-id}")
+    private String instanceId;
 
     private final static String SEARCH_Q = "q";
     private final static String SEARCH_BY = "by";
@@ -34,16 +38,24 @@ public class SearchService {
         return stock.stream()
                 .map(e -> new SearchResultModel(
                         new SharedLibraryModel(e.id(), e.name(), e.address()),
-                        existingBooksMap.get(e.bookId()))
+                        existingBooksMap.get(e.bookId()),
+                        instanceId)
                 )
                 .toList();
     }
 
-    public List<SharedLibraryModel> searchLibraries(Map<String, String> params) {
+    public List<SearchResultModel> searchLibraries(Map<String, String> params) {
         checkQueryParams(params);
 
         var ids = proxyService.getBookIdsFromRemoteService(params.get(SEARCH_Q), params.get(SEARCH_BY));
-        return proxyService.getLibrariesByBookIdsFromRemoteService(ids);
+        return proxyService.getLibrariesByBookIdsFromRemoteService(ids)
+                .stream()
+                .map(e -> new SearchResultModel(
+                        new SharedLibraryModel(e.id(), e.name(), e.address()),
+                        null,
+                        instanceId)
+                )
+                .toList();
     }
 
     private static void checkQueryParams(Map<String, String> params) {

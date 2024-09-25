@@ -3,6 +3,7 @@ package xyz.toway.sales.service;
 import jakarta.validation.Valid;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import xyz.toway.sales.entity.SaleEntity;
 import xyz.toway.sales.model.SaleModel;
@@ -17,6 +18,9 @@ import java.util.Objects;
 
 @Service
 public class SaleService {
+
+    @Value("${eureka.instance.instance-id}")
+    private String instanceId;
 
     private final SaleRepository saleRepository;
     private final AmqpTemplate qpTemplate;
@@ -37,7 +41,7 @@ public class SaleService {
 
     public void deleteSale(Long id) {
 
-        var sale = saleRepository.findById(id).orElseThrow(() -> new WrongParamsException("No sale with id=" + id));
+        var sale = saleRepository.findById(id).orElseThrow(() -> new WrongParamsException("No sale item with id=" + id));
 
         //delete from db
         saleRepository.deleteById(id);
@@ -49,19 +53,18 @@ public class SaleService {
     public SaleModel createSale(@Valid SaleModel sale) {
         //check library id, book id, quantity from stock
         var canCreateSaleItem = proxyService.checkStockBeforeSale(sale.libraryId(), sale.bookId(), sale.quantity());
-        if (canCreateSaleItem) {
-
-            //save new sale item to db
-            SaleEntity entity = createSaleEntity(sale);
-
-            // send message about new sale
-            var saleResult = createSaleModel(saleRepository.save(entity));
-            qpTemplate.convertAndSend(RabbitMQConstants.EXCHANGE_NAME, RabbitMQConstants.ADD_ROUTING_KEY, createSharedSaleModel(saleResult));
-
-            return saleResult;
-        } else {
+        if (!canCreateSaleItem) {
             throw new WrongParamsException("Invalid parameters or insufficient quantity of books.");
         }
+
+        //save new sale item to db
+        SaleEntity entity = createSaleEntity(sale);
+
+        // send message about new sale
+        var saleResult = createSaleModel(saleRepository.save(entity));
+        qpTemplate.convertAndSend(RabbitMQConstants.EXCHANGE_NAME, RabbitMQConstants.ADD_ROUTING_KEY, createSharedSaleModel(saleResult));
+
+        return saleResult;
     }
 
     public SaleModel getSaleById(Long id) {
@@ -71,7 +74,14 @@ public class SaleService {
     }
 
     private SaleModel createSaleModel(SaleEntity entity) {
-        return new SaleModel(entity.getId(), entity.getLibraryId(), entity.getBookId(), entity.getQuantity(), entity.getSaleDate());
+        return new SaleModel(
+                entity.getId(),
+                entity.getLibraryId(),
+                entity.getBookId(),
+                entity.getQuantity(),
+                entity.getSaleDate(),
+                instanceId
+        );
     }
 
     private SaleEntity createSaleEntity(SaleModel model) {

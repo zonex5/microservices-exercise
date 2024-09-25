@@ -19,6 +19,8 @@ import java.util.List;
 @Service
 public class ProxyService {
 
+    private final static String REQUEST_LIMIT = "Request limit exceeded. Please try again later.";
+
     private final BookServiceProxy bookServiceProxy;
     private final LibraryServiceProxy libraryServiceProxy;
 
@@ -27,11 +29,16 @@ public class ProxyService {
         this.libraryServiceProxy = libraryServiceProxy;
     }
 
-    @RateLimiter(name = "remote-service", fallbackMethod = "rateLimiterFallback")
+    @RateLimiter(name = "remote-service", fallbackMethod = "rateLimiterBooksFallback")
     @Retry(name = "remote-service")
     @CircuitBreaker(name = "book-service", fallbackMethod = "bookFallbackMethod")
     public List<SharedBookModel> getBooksFromRemoteService(String q, String by) {
         return bookServiceProxy.searchBooks(q, by);
+    }
+
+    @SuppressWarnings("unused")
+    public List<SharedBookModel> rateLimiterBooksFallback(String q, String by, Throwable throwable) {
+        throw new RateLimitExceededException(REQUEST_LIMIT);
     }
 
     @SuppressWarnings("unused")
@@ -40,7 +47,7 @@ public class ProxyService {
         return Collections.emptyList();
     }
 
-    @RateLimiter(name = "remote-service", fallbackMethod = "rateLimiterIdsFallback")
+    @RateLimiter(name = "remote-service", fallbackMethod = "rateLimiterStockFallback")
     @Retry(name = "remote-service")
     @CircuitBreaker(name = "library-service", fallbackMethod = "stockFallbackMethod")
     public List<SharedLibraryStockModel> getStockFromRemoteService(List<Long> ids) {
@@ -53,7 +60,12 @@ public class ProxyService {
         return Collections.emptyList();
     }
 
-    @RateLimiter(name = "remote-service", fallbackMethod = "rateLimiterFallback")
+    @SuppressWarnings("unused")
+    public List<SharedLibraryStockModel> rateLimiterStockFallback(List<Integer> ids, Throwable throwable) {
+        throw new RateLimitExceededException(REQUEST_LIMIT);
+    }
+
+    @RateLimiter(name = "remote-service", fallbackMethod = "rateLimiterIdsFallback")
     @Retry(name = "remote-service")
     @CircuitBreaker(name = "book-service", fallbackMethod = "bookIdsFallbackMethod")
     public List<Long> getBookIdsFromRemoteService(String q, String by) {
@@ -66,7 +78,12 @@ public class ProxyService {
         return Collections.emptyList();
     }
 
-    @RateLimiter(name = "remote-service", fallbackMethod = "rateLimiterIdsFallback")
+    @SuppressWarnings("unused")
+    public List<Long> rateLimiterIdsFallback(String q, String by, Throwable throwable) {
+        throw new RateLimitExceededException("Request limit exceeded. Please try again later.");
+    }
+
+    @RateLimiter(name = "remote-service", fallbackMethod = "rateLimiterLibsFallback")
     @Retry(name = "remote-service")
     @CircuitBreaker(name = "library-service", fallbackMethod = "librariesByBookIdsFallbackMethod")
     public List<SharedLibraryModel> getLibrariesByBookIdsFromRemoteService(List<Long> ids) {
@@ -80,12 +97,7 @@ public class ProxyService {
     }
 
     @SuppressWarnings("unused")
-    public String rateLimiterFallback(String q, String by, Throwable throwable) {
-        throw new RateLimitExceededException("Request limit exceeded. Please try again later.");
-    }
-
-    @SuppressWarnings("unused")
-    public String rateLimiterIdsFallback(List<Long> ids, Throwable throwable) {
-        throw new RateLimitExceededException("Request limit exceeded. Please try again later.");
+    public List<SharedLibraryModel> rateLimiterLibsFallback(List<Long> ids, Throwable throwable) {
+        throw new RateLimitExceededException(REQUEST_LIMIT);
     }
 }
