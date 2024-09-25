@@ -101,4 +101,8 @@ public class StockService {
             throw new WrongParamsException("Insufficient quantity of books. [id=%d, quantity=%d]".formatted(model.bookId(), model.quantity()));
         }
     }
+
+    public boolean checkBookCanDeleteById(Long id) {
+        return !libraryStockRepository.existsByBookId(id);
+    }
 }

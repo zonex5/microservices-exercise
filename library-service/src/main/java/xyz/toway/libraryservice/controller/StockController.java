@@ -44,6 +44,15 @@ public class StockController {
         }
     }
 
+    @GetMapping("/check-book-can-delete/{id}")
+    private ResponseEntity<?> checkBookById(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(stockService.checkBookCanDeleteById(id));
+        } catch (Exception e) {
+            return ResponseEntity.ok(false);
+        }
+    }
+
     @PostMapping
     private ResponseEntity<?> addStockItem(@Valid @RequestBody StockModel item) {
         try {

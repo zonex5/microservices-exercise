@@ -6,6 +6,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import xyz.toway.bookservice.entity.BookEntity;
 import xyz.toway.bookservice.model.BookModel;
+import xyz.toway.bookservice.proxy.LibraryServiceProxy;
 import xyz.toway.bookservice.repository.AuthorRepository;
 import xyz.toway.bookservice.repository.BookRepository;
 import xyz.toway.shared.exception.WrongParamsException;
@@ -25,10 +26,12 @@ public class BookService {
 
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
+    private final LibraryServiceProxy libraryServiceProxy;
 
-    public BookService(@Autowired BookRepository bookRepository, @Autowired AuthorRepository authorRepository) {
+    public BookService(@Autowired BookRepository bookRepository, @Autowired AuthorRepository authorRepository, @Autowired LibraryServiceProxy libraryServiceProxy) {
         this.bookRepository = bookRepository;
         this.authorRepository = authorRepository;
+        this.libraryServiceProxy = libraryServiceProxy;
     }
 
     public BookEntity saveBook(@Valid BookModel book) {
@@ -59,7 +62,11 @@ public class BookService {
     }
 
     public void deleteBook(Long id) {
-        bookRepository.deleteById(id);
+        if (libraryServiceProxy.checkBookCanDelete(id)) {
+            bookRepository.deleteById(id);
+        } else {
+            throw new WrongParamsException("The Book with id=" + id + " can't be deleted.");
+        }
     }
 
     public List<SharedBookModel> searchBooks(Map<String, String> params) {
