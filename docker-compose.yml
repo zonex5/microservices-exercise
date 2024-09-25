@@ -6,12 +6,13 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres #todo
+      POSTGRES_DB: db_books
     ports:
       - "5433:5432"
     networks:
       - db-network
     volumes:
+      - ./other/schema/db_books.sql:/docker-entrypoint-initdb.d/schema.sql
       - D:\DockerPostgresData\db_books:/var/lib/postgresql/data
 
   postgres-16-library:
@@ -21,12 +22,13 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
+      POSTGRES_DB: db_library
     ports:
       - "5434:5432"
     networks:
       - db-network
     volumes:
+      - ./other/schema/db_library.sql:/docker-entrypoint-initdb.d/schema.sql
       - D:\DockerPostgresData\db_library:/var/lib/postgresql/data
 
   postgres-16-sales:
@@ -36,12 +38,13 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
+      POSTGRES_DB: db_sales
     ports:
       - "5435:5432"
     networks:
       - db-network
     volumes:
+      - ./other/schema/db_sales.sql:/docker-entrypoint-initdb.d/schema.sql
       - D:\DockerPostgresData\db_sales:/var/lib/postgresql/data
 
   rabbitmq:
@@ -74,72 +77,73 @@ services:
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
 
-#  book-service:
-#    image: books-service:0.1
-#    ports:
-#      - "8010:8010"
-#    networks:
-#      - db-network
-#    depends_on:
-#      - service-discovery
-#      - api-gateway
-#      - postgres-16-books
-#    environment:
-#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
-#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-16-books:5432/db_books
-#      SPRING_DATASOURCE_USERNAME: postgres
-#      SPRING_DATASOURCE_PASSWORD: postgres
-#
-#  library-service:
-#    image: library-service:0.1
-#    ports:
-#      - "8020:8020"
-#    networks:
-#      - db-network
-#    depends_on:
-#      - service-discovery
-#      - api-gateway
-#      - postgres-16-library
-#    environment:
-#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
-#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-16-library:5432/db_library
-#      SPRING_DATASOURCE_USERNAME: postgres
-#      SPRING_DATASOURCE_PASSWORD: postgres
-#
-#  sale-service:
-#    image: sale-service:0.1
-#    ports:
-#      - "8040:8040"
-#    networks:
-#      - db-network
-#    depends_on:
-#      - service-discovery
-#      - api-gateway
-#      - postgres-16-sales
-#    environment:
-#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
-#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-16-sales:5432/db_sales
-#      SPRING_DATASOURCE_USERNAME: postgres
-#      SPRING_DATASOURCE_PASSWORD: postgres
-#  todo   spring.rabbitmq.host=localhost
-#     spring.rabbitmq.port=5672
-#     spring.rabbitmq.username=guest
-#     spring.rabbitmq.password=guest
-#
-#  seacrh-service:
-#    image: search-service:0.1
-#    ports:
-#      - "8030:8030"
-#    networks:
-#      - db-network
-#    depends_on:
-#      - service-discovery
-#      - api-gateway
-#      - library-service
-#      - book-service
-#    environment:
-#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+  book-service:
+    image: books-service:0.1
+    ports:
+      - "8010:8010"
+    networks:
+      - db-network
+    depends_on:
+      - service-discovery
+      - api-gateway
+      - postgres-16-books
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-16-books:5432/db_books
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+
+  library-service:
+    image: library-service:0.1
+    ports:
+      - "8020:8020"
+    networks:
+      - db-network
+    depends_on:
+      - service-discovery
+      - api-gateway
+      - postgres-16-library
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-16-library:5432/db_library
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+
+  sale-service:
+    image: sale-service:0.1
+    ports:
+      - "8040:8040"
+    networks:
+      - db-network
+    depends_on:
+      - service-discovery
+      - api-gateway
+      - postgres-16-sales
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-16-sales:5432/db_sales
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+
+  search-service:
+    image: search-service:0.1
+    ports:
+      - "8030:8030"
+    networks:
+      - db-network
+    depends_on:
+      - service-discovery
+      - api-gateway
+      - library-service
+      - book-service
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
 
 networks:
   db-network:
     driver: bridge
+
+#      spring.rabbitmq.host=localhost
+#      spring.rabbitmq.port=5672
+#      spring.rabbitmq.username=guest
+#      spring.rabbitmq.password=guest
