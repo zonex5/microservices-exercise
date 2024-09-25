@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 public class ApiGatewayConfig {
 
     @Bean
-    public RouteLocator customRoutes(RouteLocatorBuilder builder) {  //todo **
+    public RouteLocator customRoutes(RouteLocatorBuilder builder) {
         return builder.routes()
                 .route(p -> p.path("/authors/**").uri("lb://book-service/authors"))
                 .route(p -> p.path("/books/**").uri("lb://book-service/books"))

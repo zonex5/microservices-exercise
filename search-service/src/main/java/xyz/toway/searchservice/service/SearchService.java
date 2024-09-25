@@ -27,15 +27,14 @@ public class SearchService {
         checkQueryParams(params);
 
         var booksList = proxyService.getBooksFromRemoteService(params.get(SEARCH_Q), params.get(SEARCH_BY));
-        var booksMap = booksList.stream().collect(Collectors.toMap(SharedBookModel::id, book -> book));
-
         var ids = booksList.stream().map(SharedBookModel::id).toList();
         var stock = proxyService.getStockFromRemoteService(ids);
+        var existingBooksMap = booksList.stream().collect(Collectors.toMap(SharedBookModel::id, book -> book));
 
         return stock.stream()
                 .map(e -> new SearchResultModel(
                         new SharedLibraryModel(e.id(), e.name(), e.address()),
-                        booksMap.get(e.bookId()))
+                        existingBooksMap.get(e.bookId()))
                 )
                 .toList();
     }

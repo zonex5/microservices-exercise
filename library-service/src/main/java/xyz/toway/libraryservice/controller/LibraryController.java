@@ -45,7 +45,7 @@ public class LibraryController {
     @GetMapping("/search-by-book-ids")
     private ResponseEntity<?> getAllLibrariesByBookIds(@RequestParam("id") List<Long> ids) {
         if (ids.size() > MAX_ALLOWED_IDS) {
-            return ResponseEntity.badRequest().body("Max allowed books to search: " + MAX_ALLOWED_IDS);
+            return ResponseEntity.badRequest().body("Too many books match the specified search criteria. Please try to refine the criteria.");
         }
         var items = libraryService.getAllLibrariesByBookIds(ids);
         return ResponseEntity.ok(items);
@@ -54,7 +54,7 @@ public class LibraryController {
     @GetMapping("/search-stock-by-ids")
     private ResponseEntity<?> getAllLibrariesStockByIds(@RequestParam("id") List<Long> ids) {
         if (ids.size() > MAX_ALLOWED_IDS) {
-            return ResponseEntity.badRequest().body("Max allowed books to search: " + MAX_ALLOWED_IDS);
+            return ResponseEntity.badRequest().body("Too many books match the specified search criteria. Please try to refine the criteria.");
         }
         var items = libraryService.getAllLibrariesStockByIds(ids);
         return ResponseEntity.ok(items);

@@ -46,14 +46,15 @@ public class LibraryService {
     }
 
     public List<SharedLibraryModel> getAllLibrariesByBookIds(List<Long> ids) {
-        return libraryStockRepository.findAllByBookIdInAndQuantityGreaterThan(ids, 0)
+        return libraryStockRepository.findDistinctByBookIdInAndQuantityGreaterThan(ids, 0)
                 .stream()
                 .map(this::createLibraryModel)
+                .distinct()
                 .toList();
     }
 
     public List<SharedLibraryStockModel> getAllLibrariesStockByIds(List<Long> ids) {
-        return libraryStockRepository.findAllByBookIdInAndQuantityGreaterThan(ids, 0)
+        return libraryStockRepository.findDistinctByBookIdInAndQuantityGreaterThan(ids, 0)
                 .stream()
                 .map(this::createLibraryStockModel)
                 .toList();
