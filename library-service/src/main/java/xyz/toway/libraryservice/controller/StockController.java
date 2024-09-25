@@ -6,12 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import xyz.toway.libraryservice.entity.StockEntity;
 import xyz.toway.libraryservice.model.StockModel;
 import xyz.toway.libraryservice.service.StockService;
 import xyz.toway.shared.exception.WrongParamsException;
-
-import java.util.List;
 
 @Log4j2
 @RestController
@@ -51,7 +48,10 @@ public class StockController {
     private ResponseEntity<?> addStockItem(@Valid @RequestBody StockModel item) {
         try {
             return ResponseEntity.ok(stockService.save(item));
-        } catch (DataIntegrityViolationException | WrongParamsException e) {
+        } catch (DataIntegrityViolationException e) {
+            log.error(e);
+            return ResponseEntity.badRequest().body("Stock item already exists");
+        } catch (WrongParamsException e) {
             log.error(e);
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -63,6 +63,9 @@ public class StockController {
     private ResponseEntity<?> updateStockItem(@Valid @RequestBody StockModel item, @PathVariable Long id) {
         try {
             return ResponseEntity.ok(stockService.update(item, id));
+        } catch (DataIntegrityViolationException e) {
+            log.error(e);
+            return ResponseEntity.badRequest().body("Stock item already exists");
         } catch (WrongParamsException e) {
             log.error(e);
             return ResponseEntity.badRequest().body(e.getMessage());

@@ -76,7 +76,6 @@ public class StockService {
         stockEntity.setBookId(item.bookId());
         stockEntity.setQuantity(item.quantity());
         stockEntity.setPrice(item.price());
-        stockEntity.setId(id);
         return stockRepository.save(stockEntity);
     }
 
