@@ -59,9 +59,9 @@ public class SaleService {
 
         //save new sale item to db
         SaleEntity entity = createSaleEntity(sale);
+        var saleResult = createSaleModel(saleRepository.save(entity));
 
         // send message about new sale
-        var saleResult = createSaleModel(saleRepository.save(entity));
         qpTemplate.convertAndSend(RabbitMQConstants.EXCHANGE_NAME, RabbitMQConstants.ADD_ROUTING_KEY, createSharedSaleModel(saleResult));
 
         return saleResult;
