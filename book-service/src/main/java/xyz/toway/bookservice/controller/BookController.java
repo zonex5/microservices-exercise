@@ -88,6 +88,8 @@ public class BookController {
         try {
             bookService.deleteBook(id);
             return ResponseEntity.ok().build();
+        } catch (WrongParamsException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(GENERAL_ERROR);
         }

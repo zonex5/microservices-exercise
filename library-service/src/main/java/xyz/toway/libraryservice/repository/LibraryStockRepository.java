@@ -13,4 +13,6 @@ public interface LibraryStockRepository extends JpaRepository<LibraryStockEntity
     List<LibraryStockEntity> findDistinctByBookIdInAndQuantityGreaterThan(List<Long> ids, Integer quantity);
 
     Optional<LibraryStockEntity> findFirstByLibraryIdAndBookId(Long id, Long bookId);
+
+    boolean existsByBookId(Long bookId);
 }
