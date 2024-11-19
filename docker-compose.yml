@@ -121,6 +121,8 @@ services:
       - "8040:8040"
     networks:
       - db-network
+    mem_limit: 512M
+    cpus: 0.5
     depends_on:
       - service-discovery
       - api-gateway
@@ -143,6 +145,8 @@ services:
       - "8041:8040"
     networks:
       - db-network
+    mem_limit: 512M
+    cpus: 0.5
     depends_on:
       - service-discovery
       - api-gateway
@@ -165,6 +169,8 @@ services:
       - "8030:8030"
     networks:
       - db-network
+    mem_limit: 512M
+    cpus: 0.5
     depends_on:
       - service-discovery
       - api-gateway
@@ -178,6 +184,8 @@ services:
     container_name: search-service-2
     ports:
       - "8031:8030"
+    mem_limit: 512M
+    cpus: 0.5
     networks:
       - db-network
     depends_on:
