@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="Custom Ruleset"
+         xmlns="http://pmd.sf.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sf.net/ruleset/2.0.0 https://pmd.github.io/pmd-6.55.0/ruleset_2_0_0.xsd"
+         xsi:noNamespaceSchemaLocation="https://pmd.github.io/pmd-6.55.0/ruleset_2_0_0.xsd">
+    <description>Custom ruleset for PMD</description>
+
+    <rule ref="category/java/codestyle.xml"/>
+</ruleset>
